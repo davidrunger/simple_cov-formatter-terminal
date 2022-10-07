@@ -11,11 +11,13 @@ gemspec
 
 group :development, :test do
   gem 'bundler', require: false
-  gem 'pry'
-  gem 'pry-byebug'
+  gem 'codecov', require: false
+  gem 'pry', require: false
+  gem 'pry-byebug', require: false
   gem 'rspec', require: false
   gem 'rubocop', require: false
   gem 'rubocop-performance', require: false
   gem 'rubocop-rspec', require: false
   gem 'runger_style', github: 'davidrunger/runger_style', require: false
+  gem 'simplecov', require: false
 end
