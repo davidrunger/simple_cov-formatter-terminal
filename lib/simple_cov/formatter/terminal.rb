@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 require_relative 'terminal/version'
-
-# frozen_string_literal: true
-
+require 'amazing_print'
 require 'memoist'
+require 'rouge'
 
 class SimpleCov::Formatter::Terminal
   extend Memoist
@@ -39,13 +38,16 @@ class SimpleCov::Formatter::Terminal
 
   memoize \
   def targeted_application_file
-    case (spec_file = self.class.executed_spec_files.first)
+    spec_file = self.class.executed_spec_files.first
+    case spec_file
     when %r{\Aspec/lib/}
       spec_file.
         sub(%r{spec/lib/}, 'lib/').
         sub(/_spec\.rb\z/, '.rb')
     else
-      raise('Could not determine targeted application file!')
+      spec_file.
+        sub(%r{spec/}, 'lib/').
+        sub(/_spec\.rb\z/, '.rb')
     end
   end
 

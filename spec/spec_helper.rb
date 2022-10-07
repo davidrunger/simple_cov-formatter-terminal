@@ -1,15 +1,20 @@
 # frozen_string_literal: true
 
 require 'simplecov'
+executed_spec_files = ARGV.grep(%r{\Aspec/.+_spec\.rb})
 if ENV.fetch('CI', nil) == 'true'
   require 'codecov'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
+elsif executed_spec_files.size == 1
+  require 'simple_cov/formatter/terminal'
+  SimpleCov::Formatter::Terminal.executed_spec_files = executed_spec_files
+  SimpleCov.formatter = SimpleCov::Formatter::Terminal
 end
 SimpleCov.start do
   add_filter(%r{\A/spec/})
 end
 
-require 'simple_cov/formatter/terminal'
+load 'simple_cov/formatter/terminal.rb'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
