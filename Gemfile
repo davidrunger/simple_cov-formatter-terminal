@@ -1,12 +1,21 @@
 # frozen_string_literal: true
 
-source "https://rubygems.org"
+ruby '3.1.2'
 
-# Specify your gem's dependencies in simple_cov-formatter-terminal.gemspec
+source 'https://rubygems.org'
+
+git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
+
+# Specify your gem's dependencies in fcom.gemspec
 gemspec
 
-gem "rake", "~> 13.0"
-
-gem "rspec", "~> 3.0"
-
-gem "rubocop", "~> 1.21"
+group :development, :test do
+  gem 'bundler', require: false
+  gem 'pry'
+  gem 'pry-byebug'
+  gem 'rspec', require: false
+  gem 'rubocop', require: false
+  gem 'rubocop-performance', require: false
+  gem 'rubocop-rspec', require: false
+  gem 'runger_style', github: 'davidrunger/runger_style', require: false
+end
