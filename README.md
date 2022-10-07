@@ -1,33 +1,57 @@
 # SimpleCov::Formatter::Terminal
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/simple_cov/formatter/terminal`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+![image](https://user-images.githubusercontent.com/8197963/194628739-7f51e575-0c74-4325-87b7-a0422b9548a1.png)
 
 ## Installation
 
-Install the gem and add to the application's Gemfile by executing:
+Add the gem to your application's `Gemfile`. Because the gem is not released via RubyGems, you will
+need to install it from GitHub.
 
-    $ bundle add simple_cov-formatter-terminal
+```rb
+group :test do
+  gem 'simple_cov-formatter-terminal', github: 'davidrunger/simple_cov-formatter-terminal'
+end
+```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+And then execute:
 
-    $ gem install simple_cov-formatter-terminal
+```
+$ bundle install
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+Add something like the following to your `spec/spec_helper.rb` file:
+
+```rb
+require 'simplecov'
+executed_spec_files = ARGV.grep(%r{\Aspec/.+_spec\.rb})
+if executed_spec_files.size == 1
+  require 'simple_cov/formatter/terminal'
+  SimpleCov::Formatter::Terminal.executed_spec_files = executed_spec_files
+  SimpleCov.formatter = SimpleCov::Formatter::Terminal
+end
+SimpleCov.start do
+  add_filter(%r{^/spec/})
+end
+```
+
+Note that `SimpleCov::Formatter::Terminal` will only be used when specs are run with a single spec
+file (e.g. `bin/rspec spec/models/user_spec.rb`) and not when multiple specs are executed (e.g. when
+simply running `bin/rspec` without any argument).
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/rspec` to run
+the tests. You can also run `bin/console` for an interactive prompt that will allow you to
+experiment.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/simple_cov-formatter-terminal.
+Bug reports and pull requests are welcome on GitHub at
+https://github.com/davidrunger/simple_cov-formatter-terminal.
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of the [MIT
+License](https://opensource.org/licenses/MIT).
