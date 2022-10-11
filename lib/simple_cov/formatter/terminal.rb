@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'terminal/version'
+require 'active_support/core_ext/string/filters'
 require 'amazing_print'
 require 'memoist'
 require 'rouge'
@@ -26,11 +27,16 @@ class SimpleCov::Formatter::Terminal
       else
         puts("Test coverage is #{'100%'.green} for #{targeted_application_file}. Good job!")
       end
-    else
+    elsif number_of_spec_files != 1
       puts(
         "Can't determine the targeted application file because the number " \
         "of executed spec files is not 1 (it's #{number_of_spec_files})!",
       )
+    else
+      puts(<<~LOG.squish)
+        Cannot show code coverage. Looked for application file "#{targeted_application_file}",
+        but it does not exist.
+      LOG
     end
   end
 
