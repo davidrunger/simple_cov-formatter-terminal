@@ -10,8 +10,30 @@ class SimpleCov::Formatter::Terminal
   extend Memoist
 
   class << self
-    attr_accessor :executed_spec_file
+    attr_accessor :executed_spec_file, :spec_file_to_application_file_map
   end
+
+  self.spec_file_to_application_file_map = {
+    %r{\Aspec/lib/} => 'lib/',
+    %r{
+      \Aspec/
+      (
+      actions|
+      channels|
+      controllers|
+      decorators|
+      helpers|
+      mailboxes|
+      mailers|
+      models|
+      policies|
+      serializers|
+      views|
+      workers
+      )
+      /
+    }x => 'app/\1/',
+  }
 
   def format(result)
     if File.exist?(targeted_application_file)
@@ -36,19 +58,20 @@ class SimpleCov::Formatter::Terminal
 
   private
 
-  memoize \
+  def executed_spec_file
+    self.class.executed_spec_file
+  end
+
+  def spec_file_to_application_file_map
+    self.class.spec_file_to_application_file_map
+  end
+
   def targeted_application_file
-    spec_file = self.class.executed_spec_file
-    case spec_file
-    when %r{\Aspec/lib/}
-      spec_file.
-        sub(%r{spec/lib/}, 'lib/').
-        sub(/_spec\.rb\z/, '.rb')
-    else
-      spec_file.
-        sub(%r{spec/}, 'lib/').
-        sub(/_spec\.rb\z/, '.rb')
-    end
+    spec_file_to_application_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
+      if executed_spec_file.match?(spec_file_regex)
+        executed_spec_file.sub(spec_file_regex, app_file_substitution)
+      end
+    end.first&.sub(/_spec\.rb\z/, '.rb') || raise('Could not map spec file to application file!')
   end
 
   def colored_line(line)
