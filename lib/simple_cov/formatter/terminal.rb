@@ -10,12 +10,11 @@ class SimpleCov::Formatter::Terminal
   extend Memoist
 
   class << self
-    attr_accessor :executed_spec_files
+    attr_accessor :executed_spec_file
   end
 
   def format(result)
-    number_of_spec_files = self.class.executed_spec_files.size
-    if number_of_spec_files == 1 && File.exist?(targeted_application_file)
+    if File.exist?(targeted_application_file)
       sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
       if sourcefile.covered_percent < 100
         header = "-- Coverage for #{targeted_application_file} --------"
@@ -27,11 +26,6 @@ class SimpleCov::Formatter::Terminal
       else
         puts("Test coverage is #{'100%'.green} for #{targeted_application_file}. Good job!")
       end
-    elsif number_of_spec_files != 1
-      puts(
-        "Can't determine the targeted application file because the number " \
-        "of executed spec files is not 1 (it's #{number_of_spec_files})!",
-      )
     else
       puts(<<~LOG.squish)
         Cannot show code coverage. Looked for application file "#{targeted_application_file}",
@@ -44,7 +38,7 @@ class SimpleCov::Formatter::Terminal
 
   memoize \
   def targeted_application_file
-    spec_file = self.class.executed_spec_files.first
+    spec_file = self.class.executed_spec_file
     case spec_file
     when %r{\Aspec/lib/}
       spec_file.
