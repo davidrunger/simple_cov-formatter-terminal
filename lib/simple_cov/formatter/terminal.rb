@@ -10,7 +10,7 @@ class SimpleCov::Formatter::Terminal
   extend Memoist
 
   class << self
-    attr_accessor :executed_spec_file
+    attr_accessor :targeted_application_file
   end
 
   def format(result)
@@ -36,19 +36,8 @@ class SimpleCov::Formatter::Terminal
 
   private
 
-  memoize \
   def targeted_application_file
-    spec_file = self.class.executed_spec_file
-    case spec_file
-    when %r{\Aspec/lib/}
-      spec_file.
-        sub(%r{spec/lib/}, 'lib/').
-        sub(/_spec\.rb\z/, '.rb')
-    else
-      spec_file.
-        sub(%r{spec/}, 'lib/').
-        sub(/_spec\.rb\z/, '.rb')
-    end
+    self.class.targeted_application_file
   end
 
   def colored_line(line)
