@@ -15,6 +15,7 @@ class SimpleCov::Formatter::Terminal
 
   self.spec_file_to_application_file_map = {
     %r{\Aspec/lib/} => 'lib/',
+    %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
     %r{
       \Aspec/
       (
