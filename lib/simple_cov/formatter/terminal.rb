@@ -75,7 +75,8 @@ class SimpleCov::Formatter::Terminal
       if executed_spec_file.match?(spec_file_regex)
         executed_spec_file.sub(spec_file_regex, app_file_substitution)
       end
-    end.first&.sub(/_spec\.rb\z/, '.rb') || raise('Could not map spec file to application file!')
+    end.first&.sub(/_spec\.rb\z/, '.rb') ||
+    raise("Could not map executed spec file #{executed_spec_file} to application file!")
   end
 
   def colored_line(line)
