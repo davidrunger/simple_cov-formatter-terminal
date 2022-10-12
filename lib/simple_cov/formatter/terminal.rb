@@ -13,28 +13,30 @@ class SimpleCov::Formatter::Terminal
     attr_accessor :executed_spec_file, :spec_file_to_application_file_map
   end
 
-  self.spec_file_to_application_file_map = {
-    %r{\Aspec/lib/} => 'lib/',
-    %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
-    %r{
-      \Aspec/
-      (
-      actions|
-      channels|
-      controllers|
-      decorators|
-      helpers|
-      mailboxes|
-      mailers|
-      models|
-      policies|
-      serializers|
-      views|
-      workers
-      )
-      /
-    }x => 'app/\1/',
-  }
+  if spec_file_to_application_file_map.nil?
+    self.spec_file_to_application_file_map = {
+      %r{\Aspec/lib/} => 'lib/',
+      %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
+      %r{
+        \Aspec/
+        (
+        actions|
+        channels|
+        controllers|
+        decorators|
+        helpers|
+        mailboxes|
+        mailers|
+        models|
+        policies|
+        serializers|
+        views|
+        workers
+        )
+        /
+      }x => 'app/\1/',
+    }
+  end
 
   def format(result)
     if File.exist?(targeted_application_file)
