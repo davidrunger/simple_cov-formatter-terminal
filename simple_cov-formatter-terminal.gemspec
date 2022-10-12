@@ -35,7 +35,6 @@ Gem::Specification.new do |spec|
 
   # Uncomment to register a new dependency of your gem
   spec.add_dependency('activesupport', '>= 7.0.4', '< 8')
-  spec.add_dependency('amazing_print', '>= 1.4.0', '< 2')
   spec.add_dependency('memoist', '>= 0.16.2', '< 1')
   spec.add_dependency('rouge', '>= 4.0.0', '< 5')
   spec.add_dependency('simplecov', '>= 0.21.2', '< 1')
