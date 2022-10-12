@@ -27,7 +27,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
   describe '#colored_line' do
     subject(:colored_line) { formatter.send(:colored_line, line) }
 
-    let(:line) { Struct.new('Line', :line_number, :coverage).new(1, coverage) }
+    let(:line) { Struct.new(:line_number, :coverage).new(1, coverage) }
 
     before do
       expect(formatter).to receive(:targeted_application_file).and_return('app/some/file.rb')
@@ -38,7 +38,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:coverage) { nil }
 
       it 'returns the source line with a gray box at the beginning' do
-        expect(colored_line).to start_with("\e[1;30m░░ \e[0m\e[38;5;239m")
+        expect(colored_line).to start_with("\e[0;30m░░ \e[0m")
       end
     end
 
@@ -46,7 +46,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:coverage) { 1 }
 
       it 'returns the source line with a green box at the beginning' do
-        expect(colored_line).to start_with("\e[1;32m██ \e[0m\e[38;5;239m")
+        expect(colored_line).to start_with("\e[0;32m██ \e[0m")
       end
     end
 
@@ -54,7 +54,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:coverage) { 0 }
 
       it 'returns the source line with a red box at the beginning' do
-        expect(colored_line).to start_with("\e[1;31m██ \e[0m\e[38;5;239m")
+        expect(colored_line).to start_with("\e[0;31m██ \e[0m")
       end
     end
   end

@@ -8,7 +8,8 @@ require 'rouge'
 class SimpleCov::Formatter::Terminal
   extend Memoist
 
-  DEFAULT_SPEC_TO_APP_MAP = {
+  # rubocop:disable Lint/OrAssignmentToConstant
+  DEFAULT_SPEC_TO_APP_MAP ||= {
     %r{\Aspec/lib/} => 'lib/',
     %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
     %r{
@@ -30,9 +31,29 @@ class SimpleCov::Formatter::Terminal
       /
     }x => 'app/\1/',
   }.freeze
+  # rubocop:enable Lint/OrAssignmentToConstant
 
   class << self
-    attr_accessor :executed_spec_file, :spec_file_to_application_file_map
+    attr_accessor :executed_spec_file, :failure_occurred, :spec_file_to_application_file_map
+
+    def setup_rspec
+      return if @rspec_is_set_up
+
+      RSpec.configure do |config|
+        config.before(:suite) do
+          SimpleCov::Formatter::Terminal.failure_occurred = false
+        end
+
+        config.after(:suite) do
+          examples = RSpec.world.filtered_examples.values.flatten
+          if examples.any?(&:exception)
+            SimpleCov::Formatter::Terminal.failure_occurred = true
+          end
+        end
+      end
+
+      @rspec_is_set_up = true
+    end
   end
 
   if spec_file_to_application_file_map.nil?
@@ -42,15 +63,24 @@ class SimpleCov::Formatter::Terminal
   def format(result)
     if File.exist?(targeted_application_file)
       sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
-      if sourcefile.covered_percent < 100
+      if self.class.failure_occurred
+        puts(<<~LOG.squish)
+          Test coverage: #{colorized_coverage(sourcefile.covered_percent)}.
+          Not showing detailed test coverage because an example failed.
+        LOG
+      elsif sourcefile.covered_percent < 100
         header = "-- Coverage for #{targeted_application_file} --------"
         puts(header)
         sourcefile.lines.each do |line|
           puts(colored_line(line))
         end
-        puts('-' * header.size)
+        message = "-- Coverage: #{colorized_coverage(sourcefile.covered_percent)} "
+        puts("#{message}#{'-' * (header.size - message.size)}")
       else
-        puts("Test coverage is #{'100%'.green} for #{targeted_application_file}. Good job!")
+        puts(<<~LOG.squish)
+          Test coverage is #{colorized_coverage(sourcefile.covered_percent)}
+          for #{targeted_application_file}. Good job!
+        LOG
       end
     else
       puts(<<~LOG.squish)
@@ -83,9 +113,9 @@ class SimpleCov::Formatter::Terminal
   def colored_line(line)
     source = syntax_highlighted_source_lines[line.line_number - 1]
     case line.coverage
-    when nil then "\e[1;30m░░ \e[0m\e[38;5;239m#{source}" # gray boxes
-    when (1..) then "\e[1;32m██ \e[0m\e[38;5;239m#{source}" # green boxes
-    when 0 then "\e[1;31m██ \e[0m\e[38;5;239m#{source}" # red boxes
+    when nil then "#{colored('░░ ', :gray)}#{source}"
+    when (1..) then "#{colored('██ ', :green)}#{source}"
+    when 0 then "#{colored('██ ', :red)}#{source}"
     end
   end
 
@@ -97,4 +127,23 @@ class SimpleCov::Formatter::Terminal
     highlighted_source = formatter.format(lexer.lex(source))
     highlighted_source.split("\n")
   end
+
+  def colored(message, color)
+    case color
+    when :gray then "\e[0;30m#{message}\e[0m"
+    when :red then "\e[0;31m#{message}\e[0m"
+    when :green then "\e[0;32m#{message}\e[0m"
+    when :yellow then "\e[0;33m#{message}\e[0m"
+    end
+  end
+
+  def colorized_coverage(covered_percent)
+    case
+    when covered_percent < 80 then colored("#{covered_percent.round(2)}%", :red)
+    when covered_percent < 100 then colored("#{covered_percent.round(2)}%", :yellow)
+    when covered_percent >= 100 then colored("#{covered_percent.round(2)}%", :green)
+    end
+  end
 end
+
+SimpleCov::Formatter::Terminal.setup_rspec
