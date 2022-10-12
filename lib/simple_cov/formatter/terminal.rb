@@ -2,7 +2,6 @@
 
 require_relative 'terminal/version'
 require 'active_support/core_ext/string/filters'
-require 'amazing_print'
 require 'memoist'
 require 'rouge'
 
@@ -84,10 +83,9 @@ class SimpleCov::Formatter::Terminal
   def colored_line(line)
     source = syntax_highlighted_source_lines[line.line_number - 1]
     case line.coverage
-    when nil then "#{'░░ '.gray}#{source}"
-    when (1..) then "#{'██ '.green}#{source}"
-    when 0 then "#{'██ '.red}#{source}"
-    else raise('Unexpected coverage value!')
+    when nil then "\e[1;30m░░ \e[0m\e[38;5;239m#{source}" # gray boxes
+    when (1..) then "\e[1;32m██ \e[0m\e[38;5;239m#{source}" # green boxes
+    when 0 then "\e[1;31m██ \e[0m\e[38;5;239m#{source}" # red boxes
     end
   end
 
