@@ -9,33 +9,35 @@ require 'rouge'
 class SimpleCov::Formatter::Terminal
   extend Memoist
 
+  DEFAULT_SPEC_TO_APP_MAP = {
+    %r{\Aspec/lib/} => 'lib/',
+    %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
+    %r{
+      \Aspec/
+      (
+      actions|
+      channels|
+      controllers|
+      decorators|
+      helpers|
+      mailboxes|
+      mailers|
+      models|
+      policies|
+      serializers|
+      views|
+      workers
+      )
+      /
+    }x => 'app/\1/',
+  }.freeze
+
   class << self
     attr_accessor :executed_spec_file, :spec_file_to_application_file_map
   end
 
   if spec_file_to_application_file_map.nil?
-    self.spec_file_to_application_file_map = {
-      %r{\Aspec/lib/} => 'lib/',
-      %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
-      %r{
-        \Aspec/
-        (
-        actions|
-        channels|
-        controllers|
-        decorators|
-        helpers|
-        mailboxes|
-        mailers|
-        models|
-        policies|
-        serializers|
-        views|
-        workers
-        )
-        /
-      }x => 'app/\1/',
-    }
+    self.spec_file_to_application_file_map = DEFAULT_SPEC_TO_APP_MAP
   end
 
   def format(result)
