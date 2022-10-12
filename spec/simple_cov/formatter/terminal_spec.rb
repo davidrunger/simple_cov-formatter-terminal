@@ -3,6 +3,32 @@
 RSpec.describe SimpleCov::Formatter::Terminal do
   subject(:formatter) { SimpleCov::Formatter::Terminal.allocate }
 
+  describe '::_setup_rspec' do
+    it 'calls the expected methods' do
+      expect(RSpec).to receive(:configure) do |&block|
+        double = instance_double(RSpec::Core::Configuration)
+
+        expect(double).to receive(:before).with(:suite).and_yield
+
+        expect(double).to receive(:after).with(:suite) do |&after_block|
+          expect(RSpec.world).
+            to receive(:filtered_examples).
+            and_return({
+              'dummy' => Struct.new(:exception).new(StandardError.new),
+            })
+
+          after_block.call
+
+          SimpleCov::Formatter::Terminal.failure_occurred = false
+        end
+
+        block.call(double)
+      end
+
+      SimpleCov::Formatter::Terminal._setup_rspec
+    end
+  end
+
   describe '#targeted_application_file' do
     subject(:targeted_application_file) { formatter.send(:targeted_application_file) }
 
@@ -27,7 +53,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
   describe '#colored_line' do
     subject(:colored_line) { formatter.send(:colored_line, line) }
 
-    let(:line) { Struct.new(:line_number, :coverage).new(1, coverage) }
+    let(:line) { Struct.new(:line_number, :coverage, :skipped?).new(1, coverage, false) }
 
     before do
       expect(formatter).to receive(:targeted_application_file).and_return('app/some/file.rb')
@@ -55,6 +81,34 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
       it 'returns the source line with a red box at the beginning' do
         expect(colored_line).to start_with("\e[0;31m██ \e[0m")
+      end
+    end
+  end
+
+  describe '#colorized_coverage' do
+    subject(:colorized_coverage) { formatter.send(:colorized_coverage, covered_percent) }
+
+    context 'when the covered percent is less than 80' do
+      let(:covered_percent) { 79.9912 }
+
+      it 'returns a string with the percentage rounded and in red' do
+        expect(colorized_coverage).to eq("\e[0;31m79.99%\e[0m")
+      end
+    end
+
+    context 'when the covered percent is >= 80 and < 100' do
+      let(:covered_percent) { 99.9904 }
+
+      it 'returns a string with the percentage rounded and in yellow' do
+        expect(colorized_coverage).to eq("\e[0;33m99.99%\e[0m")
+      end
+    end
+
+    context 'when the covered percent is 100' do
+      let(:covered_percent) { 100.0 }
+
+      it 'returns a string with the percentage rounded and in green' do
+        expect(colorized_coverage).to eq("\e[0;32m100.0%\e[0m")
       end
     end
   end
