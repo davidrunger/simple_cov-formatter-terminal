@@ -39,6 +39,13 @@ class SimpleCov::Formatter::Terminal
     def setup_rspec
       return if @rspec_is_set_up
 
+      # :nocov:
+      _setup_rspec
+      @rspec_is_set_up = true
+      # :nocov:
+    end
+
+    def _setup_rspec
       RSpec.configure do |config|
         config.before(:suite) do
           SimpleCov::Formatter::Terminal.failure_occurred = false
@@ -51,14 +58,10 @@ class SimpleCov::Formatter::Terminal
           end
         end
       end
-
-      @rspec_is_set_up = true
     end
   end
 
-  if spec_file_to_application_file_map.nil?
-    self.spec_file_to_application_file_map = DEFAULT_SPEC_TO_APP_MAP
-  end
+  self.spec_file_to_application_file_map ||= DEFAULT_SPEC_TO_APP_MAP
 
   def format(result)
     if File.exist?(targeted_application_file)
@@ -112,6 +115,8 @@ class SimpleCov::Formatter::Terminal
 
   def colored_line(line)
     source = syntax_highlighted_source_lines[line.line_number - 1]
+    return "#{colored('░░ ', :gray)}#{source}" if line.skipped?
+
     case line.coverage
     when nil then "#{colored('░░ ', :gray)}#{source}"
     when (1..) then "#{colored('██ ', :green)}#{source}"
