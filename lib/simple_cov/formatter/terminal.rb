@@ -67,6 +67,7 @@ class SimpleCov::Formatter::Terminal
     self.class.spec_file_to_application_file_map
   end
 
+  memoize \
   def targeted_application_file
     spec_file_to_application_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
       if executed_spec_file.match?(spec_file_regex)
