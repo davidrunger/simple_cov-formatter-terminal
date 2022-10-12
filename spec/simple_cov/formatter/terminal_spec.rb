@@ -41,5 +41,21 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         expect(colored_line).to start_with("\e[1;30m░░ \e[0m\e[38;5;239m")
       end
     end
+
+    context 'when the line coverage is >= 1' do
+      let(:coverage) { 1 }
+
+      it 'returns the source line with a green box at the beginning' do
+        expect(colored_line).to start_with("\e[1;32m██ \e[0m\e[38;5;239m")
+      end
+    end
+
+    context 'when the line coverage is 0' do
+      let(:coverage) { 0 }
+
+      it 'returns the source line with a red box at the beginning' do
+        expect(colored_line).to start_with("\e[1;31m██ \e[0m\e[38;5;239m")
+      end
+    end
   end
 end
