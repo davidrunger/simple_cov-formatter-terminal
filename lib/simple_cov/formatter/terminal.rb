@@ -31,14 +31,24 @@ class SimpleCov::Formatter::Terminal
       /
     }x => 'app/\1/',
   }.freeze
+  DEFAULT_UNMAPPABLE_SPEC_REGEXES ||= [
+    %r{\Aspec/features/},
+  ].freeze
   # rubocop:enable Lint/OrAssignmentToConstant
 
   class << self
-    attr_accessor :executed_spec_file, :failure_occurred, :spec_file_to_application_file_map
+    attr_accessor(
+      :executed_spec_file,
+      :failure_occurred,
+      :spec_file_to_application_file_map,
+      :unmappable_spec_regexes,
+    )
 
     def setup_rspec
       return if @rspec_is_set_up
 
+      # We can't easily test this, since we use this library in its own RSpec tests,
+      # so we'd be setting it up twice if we tested it, which would be a bit of a problem.
       # :nocov:
       _setup_rspec
       @rspec_is_set_up = true
@@ -62,38 +72,59 @@ class SimpleCov::Formatter::Terminal
   end
 
   self.spec_file_to_application_file_map ||= DEFAULT_SPEC_TO_APP_MAP
+  self.unmappable_spec_regexes ||= DEFAULT_UNMAPPABLE_SPEC_REGEXES
 
   def format(result)
-    if File.exist?(targeted_application_file)
-      sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
-      if self.class.failure_occurred
-        puts(<<~LOG.squish)
-          Test coverage: #{colorized_coverage(sourcefile.covered_percent)}.
-          Not showing detailed test coverage because an example failed.
-        LOG
-      elsif sourcefile.covered_percent < 100
-        header = "-- Coverage for #{targeted_application_file} --------"
-        puts(header)
-        sourcefile.lines.each do |line|
-          puts(colored_line(line))
-        end
-        message = "-- Coverage: #{colorized_coverage(sourcefile.covered_percent)} "
-        puts("#{message}#{'-' * (header.size - message.size)}")
-      else
-        puts(<<~LOG.squish)
-          Test coverage is #{colorized_coverage(sourcefile.covered_percent)}
-          for #{targeted_application_file}. Good job!
-        LOG
-      end
+    if targeted_application_file.nil?
+      print_info_for_undetermined_application_target
+    elsif File.exist?(targeted_application_file)
+      print_coverage_details(result)
     else
-      puts(<<~LOG.squish)
-        Cannot show code coverage. Looked for application file "#{targeted_application_file}",
-        but it does not exist.
-      LOG
+      print_info_for_nonexistent_application_target
     end
   end
 
   private
+
+  def print_coverage_details(result)
+    sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
+    if self.class.failure_occurred
+      puts(<<~LOG.squish)
+        Test coverage: #{colorized_coverage(sourcefile.covered_percent)}.
+        Not showing detailed test coverage because an example failed.
+      LOG
+    elsif sourcefile.covered_percent < 100
+      header = "-- Coverage for #{targeted_application_file} --------"
+      puts(header)
+      sourcefile.lines.each do |line|
+        puts(colored_line(line))
+      end
+      message = "-- Coverage: #{colorized_coverage(sourcefile.covered_percent)} "
+      puts("#{message}#{'-' * (header.size - message.size)}")
+    else
+      puts(<<~LOG.squish)
+        Test coverage is #{colorized_coverage(sourcefile.covered_percent)}
+        for #{targeted_application_file}. Good job!
+      LOG
+    end
+  end
+
+  def print_info_for_undetermined_application_target
+    puts(<<~LOG.squish)
+      Not showing test coverage details because "#{executed_spec_file}" cannot
+      be mapped to a single application file.
+    LOG
+    puts(<<~LOG.squish)
+      Tip: you can specify a file manually via a SIMPLECOV_TARGET_FILE environment variable.
+    LOG
+  end
+
+  def print_info_for_nonexistent_application_target
+    puts(<<~LOG.squish)
+      Cannot show code coverage. Looked for application file "#{targeted_application_file}",
+      but it does not exist.
+    LOG
+  end
 
   def executed_spec_file
     self.class.executed_spec_file
@@ -103,8 +134,20 @@ class SimpleCov::Formatter::Terminal
     self.class.spec_file_to_application_file_map
   end
 
+  def unmappable_spec_regexes
+    self.class.unmappable_spec_regexes
+  end
+
   memoize \
   def targeted_application_file
+    env_variable_file = ENV.fetch('SIMPLECOV_TARGET_FILE', nil)
+    if !env_variable_file.nil?
+      puts('Determined targeted application file from SIMPLECOV_TARGET_FILE environment variable.')
+      return env_variable_file
+    end
+
+    return nil if unmappable_spec_regexes.any? { executed_spec_file.match?(_1) }
+
     spec_file_to_application_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
       if executed_spec_file.match?(spec_file_regex)
         executed_spec_file.sub(spec_file_regex, app_file_substitution)
