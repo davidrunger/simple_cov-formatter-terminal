@@ -71,14 +71,22 @@ RSpec.describe SimpleCov::Formatter::Terminal do
           at_least(:once).
           and_return(targeted_application_file)
 
-        expect(result).to receive(:files).and_return([
-          SimpleCov::SourceFile.new(targeted_application_file, coverage_data),
-        ])
+        expect(result).to receive(:files).and_return(files)
       end
 
       let(:targeted_application_file) { 'lib/simple_cov/formatter/terminal.rb' }
+      let(:files) { [SimpleCov::SourceFile.new(targeted_application_file, coverage_data)] }
       let(:coverage_data) do
         { 'lines' => [] }
+      end
+
+      context 'when there is no coverage info about the targeted file' do
+        let(:files) { [SimpleCov::SourceFile.new('app/not/the/target/file.rb', coverage_data)] }
+
+        it 'prints that no coverage info was found' do
+          expect(formatter).to receive(:puts).with(/No code coverage info was found/)
+          format
+        end
       end
 
       context 'when a test failure failure occurred' do
