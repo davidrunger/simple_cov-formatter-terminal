@@ -13,11 +13,13 @@ group :test do
 end
 ```
 
-And then execute:
+Then execute:
 
 ```
 $ bundle install
 ```
+
+Then continue to the "Usage" section below.
 
 ## Usage
 
@@ -32,9 +34,9 @@ end
 SimpleCov.start
 ```
 
-Note that `SimpleCov::Formatter::Terminal` will only be used when specs are run with a single spec
-file (e.g. `bin/rspec spec/models/user_spec.rb`) and not when multiple specs are executed (e.g. when
-simply running `bin/rspec` without any argument).
+**Note** that this setup only uses `SimpleCov::Formatter::Terminal` as the SimpleCov formatter when
+specs are run with a single spec file (e.g. `bin/rspec spec/models/user_spec.rb`) and not when
+multiple specs are executed (e.g. when simply running `bin/rspec` without any argument).
 
 ### Modifying the `spec_file_to_application_file_map`
 
