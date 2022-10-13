@@ -200,13 +200,14 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         SimpleCov::SourceFile::Line,
         line_number: 1,
         skipped?: false,
-        source: "# frozen_string_literal\n",
+        src: "# frozen_string_literal\n",
         coverage:,
       )
     end
     let(:sourcefile) do
       instance_double(
         SimpleCov::SourceFile,
+        lines: [line],
         branches:,
       )
     end
@@ -417,13 +418,14 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         SimpleCov::SourceFile::Line,
         line_number: 1,
         skipped?: false,
-        source: "puts(rand(10) < 5 ? 'hello world' : 'goodbye world')\n",
+        src: "puts(rand(10) < 5 ? 'hello world' : 'goodbye world')\n",
         coverage: 1,
       )
     end
     let(:sourcefile) do
       instance_double(
         SimpleCov::SourceFile,
+        lines: [line],
         branches: [
           instance_double(
             SimpleCov::SourceFile::Branch,
