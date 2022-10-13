@@ -29,9 +29,7 @@ if ARGV.grep(%r{\Aspec/.+_spec\.rb}).size == 1
   require 'simple_cov/formatter/terminal'
   SimpleCov.formatter = SimpleCov::Formatter::Terminal
 end
-SimpleCov.start do
-  add_filter(%r{^/spec/})
-end
+SimpleCov.start
 ```
 
 Note that `SimpleCov::Formatter::Terminal` will only be used when specs are run with a single spec
