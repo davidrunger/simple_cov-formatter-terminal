@@ -9,6 +9,7 @@ class SimpleCov::Formatter::Terminal
   extend Memoist
 
   # rubocop:disable Lint/OrAssignmentToConstant
+  MAX_LINE_WIDTH ||= 100
   SPEC_TO_APP_DEFAULT_MAP ||= {
     %r{\Aspec/lib/} => 'lib/',
     %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
@@ -115,24 +116,36 @@ class SimpleCov::Formatter::Terminal
         Test coverage: #{colorized_coverage(sourcefile.covered_percent)}.
         Not showing detailed test coverage because an example failed.
       LOG
-    elsif sourcefile.covered_percent < 100
+    elsif sourcefile.covered_percent < 100 || uncovered_branches(sourcefile).any?
       print_coverage_details(sourcefile)
     else
       puts(<<~LOG.squish)
-        Test coverage is #{colorized_coverage(sourcefile.covered_percent)}
+        Test coverage is
+        #{colorized_coverage(sourcefile.covered_percent)}
+        and there are
+        #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)} uncovered branches
         for #{targeted_application_file}. Good job!
       LOG
     end
   end
 
+  memoize \
+  def uncovered_branches(sourcefile)
+    sourcefile.branches.reject(&:covered?)
+  end
+
   def print_coverage_details(sourcefile)
-    header = "-- Coverage for #{targeted_application_file} --------"
+    header = "---- Coverage for #{targeted_application_file} ".ljust(MAX_LINE_WIDTH + 5, '-')
     puts(header)
     sourcefile.lines.each do |line|
-      puts(colored_line(line))
+      puts(colored_line(line, sourcefile))
     end
-    message = "-- Coverage: #{colorized_coverage(sourcefile.covered_percent)} "
-    puts("#{message}#{'-' * (header.size - message.size)}")
+    puts((<<~LOG.squish + ' ').ljust(127, '-')) # rubocop:disable Style/StringConcatenation
+      ----
+      Line coverage: #{colorized_coverage(sourcefile.covered_percent)}
+      |
+      Uncovered branches: #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)}
+    LOG
   end
 
   def print_info_for_undetermined_application_target
@@ -175,7 +188,7 @@ class SimpleCov::Formatter::Terminal
   def targeted_application_file
     env_variable_file = ENV.fetch('SIMPLECOV_TARGET_FILE', nil)
     if !env_variable_file.nil?
-      puts('Determined targeted application file from SIMPLECOV_TARGET_FILE environment variable.')
+      puts('Determined targeted application file from SIMPLECOV_TARGET_FILE environment variable!!')
       return env_variable_file
     end
 
@@ -189,15 +202,38 @@ class SimpleCov::Formatter::Terminal
     raise("Could not map executed spec file #{executed_spec_file} to application file!")
   end
 
-  def colored_line(line)
-    source = syntax_highlighted_source_lines[line.line_number - 1]
-    return "#{colored('░░ ', :gray)}#{source}" if line.skipped?
+  def colored_line(line, sourcefile)
+    colored_source_code = syntax_highlighted_source_lines[line.line_number - 1]
+    required_padding = [1 + MAX_LINE_WIDTH - line.source.rstrip.size, 0].max
+    padding = ' ' * required_padding
+    branch_info = missed_branch_info(line, sourcefile)
+    if line.skipped?
+      return full_line_output('░', :gray, colored_source_code, padding, branch_info)
+    end
 
     case line.coverage
-    when nil then "#{colored('░░ ', :gray)}#{source}"
-    when (1..) then "#{colored('██ ', :green)}#{source}"
-    when 0 then "#{colored('██ ', :red)}#{source}"
+    when nil then full_line_output('░', :gray, colored_source_code, padding, branch_info)
+    when (1..) then full_line_output('█', :green, colored_source_code, padding, branch_info)
+    when 0 then full_line_output('█', :red, colored_source_code, padding, branch_info)
     end
+  end
+
+  def full_line_output(leading_box, box_color, source_code, padding, branch_info)
+    # rubocop:disable Style/StringConcatenation
+    color(leading_box * 2, box_color) +
+      ' ' +
+      source_code +
+      padding +
+      '| ' +
+      color(branch_info, :red)
+    # rubocop:enable Style/StringConcatenation
+  end
+
+  def missed_branch_info(line, sourcefile)
+    uncovered_branches(sourcefile).
+      select { _1.start_line == line.line_number }.
+      map { _1.type.to_s }.
+      join(', ')
   end
 
   memoize \
@@ -209,7 +245,7 @@ class SimpleCov::Formatter::Terminal
     highlighted_source.split("\n")
   end
 
-  def colored(message, color)
+  def color(message, color)
     case color
     when :gray then "\e[0;30m#{message}\e[0m"
     when :red then "\e[0;31m#{message}\e[0m"
@@ -220,9 +256,17 @@ class SimpleCov::Formatter::Terminal
 
   def colorized_coverage(covered_percent)
     case
-    when covered_percent < 80 then colored("#{covered_percent.round(2)}%", :red)
-    when covered_percent < 100 then colored("#{covered_percent.round(2)}%", :yellow)
-    when covered_percent >= 100 then colored("#{covered_percent.round(2)}%", :green)
+    when covered_percent < 80 then color("#{covered_percent.round(2)}%", :red)
+    when covered_percent < 100 then color("#{covered_percent.round(2)}%", :yellow)
+    when covered_percent >= 100 then color("#{covered_percent.round(2)}%", :green)
+    end
+  end
+
+  def colorized_uncovered_branches(num_uncovered_branches)
+    case num_uncovered_branches
+    when 0 then color(num_uncovered_branches.to_s, :green)
+    when (1..3) then color(num_uncovered_branches.to_s, :yellow)
+    else color(num_uncovered_branches.to_s, :red)
     end
   end
 end
