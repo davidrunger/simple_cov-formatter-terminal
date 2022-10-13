@@ -50,7 +50,7 @@ class SimpleCov::Formatter::Terminal
     )
 
     def setup_rspec
-      return if @rspec_is_set_up
+      return if @rspec_is_set_up # :nocov-else:
 
       # We can't easily test this, since we use this library in its own RSpec tests,
       # so we'd be setting it up twice if we tested it, which would be a bit of a problem.
@@ -128,7 +128,12 @@ class SimpleCov::Formatter::Terminal
 
   memoize \
   def uncovered_branches(sourcefile)
-    sourcefile.branches.reject(&:covered?)
+    sourcefile.branches.
+      reject(&:covered?).
+      reject do |branch|
+        source_code = sourcefile.lines[branch.start_line - 1].src
+        source_code.match?(/# :nocov-(else|when):/)
+      end
   end
 
   def print_coverage_details(sourcefile)
