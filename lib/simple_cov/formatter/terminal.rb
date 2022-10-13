@@ -78,7 +78,7 @@ class SimpleCov::Formatter::Terminal
     if targeted_application_file.nil?
       print_info_for_undetermined_application_target
     elsif File.exist?(targeted_application_file)
-      print_coverage_details(result)
+      print_coverage_info(result)
     else
       print_info_for_nonexistent_application_target
     end
@@ -86,7 +86,7 @@ class SimpleCov::Formatter::Terminal
 
   private
 
-  def print_coverage_details(result)
+  def print_coverage_info(result)
     sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
     if self.class.failure_occurred
       puts(<<~LOG.squish)
@@ -94,19 +94,23 @@ class SimpleCov::Formatter::Terminal
         Not showing detailed test coverage because an example failed.
       LOG
     elsif sourcefile.covered_percent < 100
-      header = "-- Coverage for #{targeted_application_file} --------"
-      puts(header)
-      sourcefile.lines.each do |line|
-        puts(colored_line(line))
-      end
-      message = "-- Coverage: #{colorized_coverage(sourcefile.covered_percent)} "
-      puts("#{message}#{'-' * (header.size - message.size)}")
+      print_coverage_details(sourcefile)
     else
       puts(<<~LOG.squish)
         Test coverage is #{colorized_coverage(sourcefile.covered_percent)}
         for #{targeted_application_file}. Good job!
       LOG
     end
+  end
+
+  def print_coverage_details(sourcefile)
+    header = "-- Coverage for #{targeted_application_file} --------"
+    puts(header)
+    sourcefile.lines.each do |line|
+      puts(colored_line(line))
+    end
+    message = "-- Coverage: #{colorized_coverage(sourcefile.covered_percent)} "
+    puts("#{message}#{'-' * (header.size - message.size)}")
   end
 
   def print_info_for_undetermined_application_target
