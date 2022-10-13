@@ -56,6 +56,65 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         format
       end
     end
+
+    context 'when the targeted application file exists' do
+      before do
+        expect(formatter).
+          to receive(:targeted_application_file).
+          at_least(:once).
+          and_return(targeted_application_file)
+
+        expect(result).to receive(:files).and_return([
+          SimpleCov::SourceFile.new(targeted_application_file, coverage_data),
+        ])
+      end
+
+      let(:targeted_application_file) { 'lib/simple_cov/formatter/terminal.rb' }
+      let(:coverage_data) do
+        { 'lines' => [] }
+      end
+
+      context 'when a test failure failure occurred' do
+        around do |spec|
+          SimpleCov::Formatter::Terminal.failure_occurred = true
+          spec.run
+          SimpleCov::Formatter::Terminal.failure_occurred = false
+        end
+
+        it 'does not print coverage details' do
+          expect(formatter).not_to receive(:print_coverage_details)
+          format
+        end
+
+        it 'says why it is not printing coverage details' do
+          expect(formatter).to receive(:puts).with(/Not showing detailed test coverage because .+/)
+          format
+        end
+      end
+
+      context 'when a test failure has not occurred' do
+        before { expect(SimpleCov::Formatter::Terminal.failure_occurred).to eq(false) }
+
+        context 'when test coverage is 100%' do
+          it 'does not print coverage details' do
+            expect(formatter).not_to receive(:print_coverage_details).and_call_original
+            format
+          end
+        end
+
+        context 'when test coverage is less than 100%' do
+          let(:coverage_data) do
+            { 'lines' => [nil, nil, 1, 2, 0, 1] }
+          end
+
+          it 'prints coverage details' do
+            expect(formatter).to receive(:print_coverage_details).and_call_original
+            expect(formatter).to receive(:puts).at_least(:once) # suppress actual output
+            format
+          end
+        end
+      end
+    end
   end
 
   describe '#targeted_application_file' do
