@@ -9,7 +9,7 @@ class SimpleCov::Formatter::Terminal
   extend Memoist
 
   # rubocop:disable Lint/OrAssignmentToConstant
-  DEFAULT_SPEC_TO_APP_MAP ||= {
+  SPEC_TO_APP_DEFAULT_MAP ||= {
     %r{\Aspec/lib/} => 'lib/',
     %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
     %r{
@@ -31,12 +31,17 @@ class SimpleCov::Formatter::Terminal
       /
     }x => 'app/\1/',
   }.freeze
+  SPEC_TO_GEM_DEFAULT_MAP = {
+    %r{\Aspec/} => 'lib/',
+  }.freeze
   DEFAULT_UNMAPPABLE_SPEC_REGEXES ||= [
     %r{\Aspec/features/},
   ].freeze
   # rubocop:enable Lint/OrAssignmentToConstant
 
   class << self
+    extend Memoist
+
     attr_accessor(
       :executed_spec_file,
       :failure_occurred,
@@ -45,7 +50,7 @@ class SimpleCov::Formatter::Terminal
     )
 
     def setup_rspec
-      return if @rspec_is_set_up
+      return if @rspec_is_set_up || !defined?(RSpec)
 
       # We can't easily test this, since we use this library in its own RSpec tests,
       # so we'd be setting it up twice if we tested it, which would be a bit of a problem.
@@ -54,6 +59,8 @@ class SimpleCov::Formatter::Terminal
       @rspec_is_set_up = true
       # :nocov:
     end
+
+    private
 
     def _setup_rspec
       RSpec.configure do |config|
@@ -69,9 +76,17 @@ class SimpleCov::Formatter::Terminal
         end
       end
     end
+
+    def gem?
+      Dir['*'].any? { _1.end_with?('.gemspec') }
+    end
+
+    def default_map
+      gem? ? SPEC_TO_GEM_DEFAULT_MAP : SPEC_TO_APP_DEFAULT_MAP
+    end
   end
 
-  self.spec_file_to_application_file_map ||= DEFAULT_SPEC_TO_APP_MAP
+  self.spec_file_to_application_file_map ||= default_map
   self.unmappable_spec_regexes ||= DEFAULT_UNMAPPABLE_SPEC_REGEXES
 
   def format(result)
