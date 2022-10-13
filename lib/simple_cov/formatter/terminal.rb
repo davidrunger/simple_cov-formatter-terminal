@@ -31,7 +31,7 @@ class SimpleCov::Formatter::Terminal
       /
     }x => 'app/\1/',
   }.freeze
-  SPEC_TO_GEM_DEFAULT_MAP = {
+  SPEC_TO_GEM_DEFAULT_MAP ||= {
     %r{\Aspec/} => 'lib/',
   }.freeze
   DEFAULT_UNMAPPABLE_SPEC_REGEXES ||= [
@@ -43,7 +43,7 @@ class SimpleCov::Formatter::Terminal
     extend Memoist
 
     attr_accessor(
-      :executed_spec_file,
+      :executed_spec_files,
       :failure_occurred,
       :spec_file_to_application_file_map,
       :unmappable_spec_regexes,
@@ -73,6 +73,8 @@ class SimpleCov::Formatter::Terminal
           if examples.any?(&:exception)
             SimpleCov::Formatter::Terminal.failure_occurred = true
           end
+          SimpleCov::Formatter::Terminal.executed_spec_files =
+            examples.map { _1.file_path.delete_prefix('./') }.uniq
         end
       end
     end
@@ -146,7 +148,14 @@ class SimpleCov::Formatter::Terminal
   end
 
   def executed_spec_file
-    self.class.executed_spec_file
+    if self.class.executed_spec_files.size == 1
+      self.class.executed_spec_files.first
+    else
+      raise(<<~ERROR)
+        Multiple spec files were executed (#{self.class.executed_spec_files}), but
+        SimpleCov::Formatter::Terminal only works when a single spec file is executed.
+      ERROR
+    end
   end
 
   def spec_file_to_application_file_map

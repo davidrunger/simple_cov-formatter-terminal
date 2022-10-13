@@ -25,10 +25,9 @@ Add something like the following to your `spec/spec_helper.rb` file:
 
 ```rb
 require 'simplecov'
-if (executed_spec_files = ARGV.grep(%r{\Aspec/.+_spec\.rb})).size == 1
+if ARGV.grep(%r{\Aspec/.+_spec\.rb}).size == 1
   require 'simple_cov/formatter/terminal'
   SimpleCov.formatter = SimpleCov::Formatter::Terminal
-  SimpleCov::Formatter::Terminal.executed_spec_file = executed_spec_files.first
 end
 SimpleCov.start do
   add_filter(%r{^/spec/})
