@@ -13,11 +13,16 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         expect(double).to receive(:before).with(:suite).and_yield
 
         expect(double).to receive(:after).with(:suite) do |&after_block|
+          rspec_example_double =
+            instance_double(
+              RSpec::Core::Example,
+              exception: StandardError.new,
+              file_path: './spec/models/user.rb',
+            )
+
           expect(RSpec.world).
             to receive(:filtered_examples).
-            and_return({
-              'dummy' => Struct.new(:exception).new(StandardError.new),
-            })
+            and_return({ 'irrelevant_key' => rspec_example_double })
 
           after_block.call
 
@@ -143,9 +148,9 @@ RSpec.describe SimpleCov::Formatter::Terminal do
     context 'when the executed spec file is an admin controller test' do
       before do
         expect(SimpleCov::Formatter::Terminal).
-          to receive(:executed_spec_file).
+          to receive(:executed_spec_files).
           at_least(:once).
-          and_return('spec/controllers/admin/csp_reports_controller_spec.rb')
+          and_return(['spec/controllers/admin/csp_reports_controller_spec.rb'])
 
         expect(SimpleCov::Formatter::Terminal).
           to receive(:spec_file_to_application_file_map).
@@ -161,7 +166,14 @@ RSpec.describe SimpleCov::Formatter::Terminal do
   describe '#colored_line' do
     subject(:colored_line) { formatter.send(:colored_line, line) }
 
-    let(:line) { Struct.new(:line_number, :coverage, :skipped?).new(1, coverage, false) }
+    let(:line) do
+      instance_double(
+        SimpleCov::SourceFile::Line,
+        line_number: 1,
+        skipped?: false,
+        coverage:,
+      )
+    end
 
     before do
       expect(formatter).to receive(:targeted_application_file).and_return('app/some/file.rb')
@@ -272,6 +284,23 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
       it 'returns the SPEC_TO_GEM_DEFAULT_MAP' do
         expect(default_map).to eq(SimpleCov::Formatter::Terminal::SPEC_TO_APP_DEFAULT_MAP)
+      end
+    end
+  end
+
+  describe '#executed_spec_file' do
+    subject(:executed_spec_file) { formatter.send(:executed_spec_file) }
+
+    context 'when multiple spec files have been executed' do
+      before do
+        expect(SimpleCov::Formatter::Terminal).
+          to receive(:executed_spec_files).
+          at_least(:once).
+          and_return(['a_spec.rb', 'b_spec.rb'])
+      end
+
+      it 'raises an error' do
+        expect { executed_spec_file }.to raise_error(/Multiple spec files were executed/)
       end
     end
   end
