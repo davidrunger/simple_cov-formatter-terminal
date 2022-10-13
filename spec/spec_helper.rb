@@ -11,6 +11,7 @@ elsif ARGV.grep(%r{\Aspec/.+_spec\.rb}).size == 1
 end
 SimpleCov.start do
   add_filter(%r{\A/spec/})
+  enable_coverage(:branch)
 end
 
 load 'simple_cov/formatter/terminal.rb'

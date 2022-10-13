@@ -172,14 +172,21 @@ RSpec.describe SimpleCov::Formatter::Terminal do
   end
 
   describe '#colored_line' do
-    subject(:colored_line) { formatter.send(:colored_line, line) }
+    subject(:colored_line) { formatter.send(:colored_line, line, sourcefile) }
 
     let(:line) do
       instance_double(
         SimpleCov::SourceFile::Line,
         line_number: 1,
         skipped?: false,
+        source: "# frozen_string_literal\n",
         coverage:,
+      )
+    end
+    let(:sourcefile) do
+      instance_double(
+        SimpleCov::SourceFile,
+        branches: [],
       )
     end
 
@@ -192,7 +199,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:coverage) { nil }
 
       it 'returns the source line with a gray box at the beginning' do
-        expect(colored_line).to start_with("\e[0;30m░░ \e[0m")
+        expect(colored_line).to start_with("\e[0;30m░░\e[0m ")
       end
     end
 
@@ -200,7 +207,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:coverage) { 1 }
 
       it 'returns the source line with a green box at the beginning' do
-        expect(colored_line).to start_with("\e[0;32m██ \e[0m")
+        expect(colored_line).to start_with("\e[0;32m██\e[0m ")
       end
     end
 
@@ -208,7 +215,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:coverage) { 0 }
 
       it 'returns the source line with a red box at the beginning' do
-        expect(colored_line).to start_with("\e[0;31m██ \e[0m")
+        expect(colored_line).to start_with("\e[0;31m██\e[0m ")
       end
     end
   end
@@ -309,6 +316,85 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
       it 'raises an error' do
         expect { executed_spec_file }.to raise_error(/Multiple spec files were executed/)
+      end
+    end
+  end
+
+  describe '#colorized_uncovered_branches' do
+    subject(:colorized_uncovered_branches) do
+      formatter.send(:colorized_uncovered_branches, num_uncovered_branches)
+    end
+
+    context 'when num_uncovered_branches is 0' do
+      let(:num_uncovered_branches) { 0 }
+
+      it 'prints 0 in green' do
+        expect(colorized_uncovered_branches).to eq("\e[0;32m0\e[0m")
+      end
+    end
+
+    context 'when num_uncovered_branches is between 1 and 3 (inclusive)' do
+      let(:num_uncovered_branches) { 2 }
+
+      it 'prints the number of uncovered branches in yellow' do
+        expect(colorized_uncovered_branches).to eq("\e[0;33m#{num_uncovered_branches}\e[0m")
+      end
+    end
+
+    context 'when num_uncovered_branches is greater than 3' do
+      let(:num_uncovered_branches) { 4 }
+
+      it 'prints the number of uncovered branches in red' do
+        expect(colorized_uncovered_branches).to eq("\e[0;31m#{num_uncovered_branches}\e[0m")
+      end
+    end
+  end
+
+  describe '#missed_branch_info' do
+    subject(:missed_branch_info) do
+      formatter.send(:missed_branch_info, line, sourcefile)
+    end
+
+    let(:line) do
+      instance_double(
+        SimpleCov::SourceFile::Line,
+        line_number: 1,
+        skipped?: false,
+        source: "puts(rand(10) < 5 ? 'hello world' : 'goodbye world')\n",
+        coverage: 1,
+      )
+    end
+    let(:sourcefile) do
+      instance_double(
+        SimpleCov::SourceFile,
+        branches: [
+          instance_double(
+            SimpleCov::SourceFile::Branch,
+            coverage: 0,
+            end_line: 1,
+            inline?: true,
+            skipped?: false,
+            covered?: false,
+            start_line: 1,
+            type: :else,
+          ),
+          instance_double(
+            SimpleCov::SourceFile::Branch,
+            coverage: 0,
+            end_line: 1,
+            inline?: true,
+            skipped?: false,
+            covered?: false,
+            start_line: 1,
+            type: :when,
+          ),
+        ],
+      )
+    end
+
+    context 'when the sourcefile has multiple uncovered branches' do
+      it 'returns the uncovered branch descriptors joined by commas' do
+        expect(missed_branch_info).to eq('else, when')
       end
     end
   end
