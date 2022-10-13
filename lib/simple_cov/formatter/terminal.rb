@@ -105,7 +105,12 @@ class SimpleCov::Formatter::Terminal
 
   def print_coverage_info(result)
     sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
-    if self.class.failure_occurred
+    if sourcefile.nil?
+      puts(<<~LOG.squish)
+        No code coverage info was found for "#{targeted_application_file}". Try stopping and
+        disabling `spring`, if you are using it, and then rerun the spec.
+      LOG
+    elsif self.class.failure_occurred
       puts(<<~LOG.squish)
         Test coverage: #{colorized_coverage(sourcefile.covered_percent)}.
         Not showing detailed test coverage because an example failed.
