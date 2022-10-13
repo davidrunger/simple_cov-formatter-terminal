@@ -50,7 +50,7 @@ class SimpleCov::Formatter::Terminal
     )
 
     def setup_rspec
-      return if @rspec_is_set_up || !defined?(RSpec)
+      return if @rspec_is_set_up
 
       # We can't easily test this, since we use this library in its own RSpec tests,
       # so we'd be setting it up twice if we tested it, which would be a bit of a problem.
@@ -70,9 +70,7 @@ class SimpleCov::Formatter::Terminal
 
         config.after(:suite) do
           examples = RSpec.world.filtered_examples.values.flatten
-          if examples.any?(&:exception)
-            SimpleCov::Formatter::Terminal.failure_occurred = true
-          end
+          SimpleCov::Formatter::Terminal.failure_occurred = examples.any?(&:exception)
           SimpleCov::Formatter::Terminal.executed_spec_files =
             examples.map { _1.file_path.delete_prefix('./') }.uniq
         end
@@ -252,14 +250,15 @@ class SimpleCov::Formatter::Terminal
     when :green then "\e[0;32m#{message}\e[0m"
     when :yellow then "\e[0;33m#{message}\e[0m"
     when :white_on_red then "\e[4;37;41m#{message}\e[0m"
+    else raise("Unknown color format '#{color}'.")
     end
   end
 
   def colorized_coverage(covered_percent)
     case
-    when covered_percent < 80 then color("#{covered_percent.round(2)}%", :red)
-    when covered_percent < 100 then color("#{covered_percent.round(2)}%", :yellow)
     when covered_percent >= 100 then color("#{covered_percent.round(2)}%", :green)
+    when covered_percent >= 80 then color("#{covered_percent.round(2)}%", :yellow)
+    else color("#{covered_percent.round(2)}%", :red)
     end
   end
 
