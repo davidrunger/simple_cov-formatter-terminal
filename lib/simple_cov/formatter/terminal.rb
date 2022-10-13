@@ -9,7 +9,6 @@ class SimpleCov::Formatter::Terminal
   extend Memoist
 
   # rubocop:disable Lint/OrAssignmentToConstant
-  MAX_LINE_WIDTH ||= 100
   SPEC_TO_APP_DEFAULT_MAP ||= {
     %r{\Aspec/lib/} => 'lib/',
     %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
@@ -135,16 +134,16 @@ class SimpleCov::Formatter::Terminal
   end
 
   def print_coverage_details(sourcefile)
-    header = "---- Coverage for #{targeted_application_file} ".ljust(MAX_LINE_WIDTH + 5, '-')
-    puts(header)
+    puts("---- Coverage for #{targeted_application_file} ".ljust(80, '-').rstrip)
     sourcefile.lines.each do |line|
       puts(colored_line(line, sourcefile))
     end
-    puts((<<~LOG.squish + ' ').ljust(127, '-')) # rubocop:disable Style/StringConcatenation
+    puts(<<~LOG.squish)
       ----
       Line coverage: #{colorized_coverage(sourcefile.covered_percent)}
       |
       Uncovered branches: #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)}
+      ----
     LOG
   end
 
@@ -204,28 +203,29 @@ class SimpleCov::Formatter::Terminal
 
   def colored_line(line, sourcefile)
     colored_source_code = syntax_highlighted_source_lines[line.line_number - 1]
-    required_padding = [1 + MAX_LINE_WIDTH - line.source.rstrip.size, 0].max
-    padding = ' ' * required_padding
-    branch_info = missed_branch_info(line, sourcefile)
-    if line.skipped?
-      return full_line_output('░', :gray, colored_source_code, padding, branch_info)
-    end
+    missed_branch_info = missed_branch_info(line, sourcefile)
 
-    case line.coverage
-    when nil then full_line_output('░', :gray, colored_source_code, padding, branch_info)
-    when (1..) then full_line_output('█', :green, colored_source_code, padding, branch_info)
-    when 0 then full_line_output('█', :red, colored_source_code, padding, branch_info)
+    case
+    when line.skipped?
+      line_output('░', :gray, colored_source_code)
+    when line.coverage == 0
+      line_output('█', :red, colored_source_code, missed_branch_info)
+    when !missed_branch_info.empty?
+      line_output('▒', :yellow, colored_source_code, missed_branch_info)
+    when line.coverage.nil?
+      line_output('░', :gray, colored_source_code, missed_branch_info)
+    else
+      line_output('█', :green, colored_source_code, missed_branch_info)
     end
   end
 
-  def full_line_output(leading_box, box_color, source_code, padding, branch_info)
+  def line_output(leading_box, box_color, source_code, missed_branch_info = '')
     # rubocop:disable Style/StringConcatenation
-    color(leading_box * 2, box_color) +
-      ' ' +
-      source_code +
-      padding +
-      '| ' +
-      color(branch_info, :red)
+    output = color(leading_box * 2, box_color) + ' ' + source_code
+    if !missed_branch_info.empty?
+      output << " #{color(missed_branch_info, :white_on_red)}"
+    end
+    output
     # rubocop:enable Style/StringConcatenation
   end
 
@@ -251,6 +251,7 @@ class SimpleCov::Formatter::Terminal
     when :red then "\e[0;31m#{message}\e[0m"
     when :green then "\e[0;32m#{message}\e[0m"
     when :yellow then "\e[0;33m#{message}\e[0m"
+    when :white_on_red then "\e[4;37;41m#{message}\e[0m"
     end
   end
 

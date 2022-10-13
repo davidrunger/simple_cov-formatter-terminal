@@ -186,13 +186,49 @@ RSpec.describe SimpleCov::Formatter::Terminal do
     let(:sourcefile) do
       instance_double(
         SimpleCov::SourceFile,
-        branches: [],
+        branches:,
       )
     end
+    let(:branches) { [] }
 
     before do
       expect(formatter).to receive(:targeted_application_file).and_return('app/some/file.rb')
       expect(File).to receive(:read).and_return("# frozen_string_literal\n")
+    end
+
+    context 'when there is missed_branch_info' do
+      let(:branches) do
+        [
+          instance_double(
+            SimpleCov::SourceFile::Branch,
+            coverage: 0,
+            end_line: 1,
+            inline?: true,
+            skipped?: false,
+            covered?: false,
+            start_line: 1,
+            type: :else,
+          ),
+          instance_double(
+            SimpleCov::SourceFile::Branch,
+            coverage: 0,
+            end_line: 1,
+            inline?: true,
+            skipped?: false,
+            covered?: false,
+            start_line: 1,
+            type: :when,
+          ),
+        ]
+      end
+
+      context 'when the line coverage is 1' do
+        let(:coverage) { 1 }
+
+        it 'returns a line with leading yellow boxes and trailing branch info' do
+          expect(colored_line).to include('else, when')
+        end
+      end
     end
 
     context 'when the line coverage is nil' do
@@ -395,6 +431,39 @@ RSpec.describe SimpleCov::Formatter::Terminal do
     context 'when the sourcefile has multiple uncovered branches' do
       it 'returns the uncovered branch descriptors joined by commas' do
         expect(missed_branch_info).to eq('else, when')
+      end
+    end
+  end
+
+  describe '#line_output' do
+    subject(:line_output) do
+      formatter.send(:line_output, leading_box, box_color, source_code, missed_branch_info)
+    end
+
+    let(:leading_box) { '▒' }
+    let(:box_color) { :yellow }
+    let(:source_code) { "\e[38;5;252m    \e[39m\e[38;5;139mcase\e[39m\e[38;5;252m\e[39m" }
+    let(:missed_branch_info) { '' }
+
+    context 'when there is missed branch info' do
+      let(:missed_branch_info) { 'else' }
+
+      it 'returns a string with the missed branch info' do
+        expect(line_output).to end_with(" \e[4;37;41m#{missed_branch_info}\e[0m")
+      end
+    end
+  end
+
+  describe '#color' do
+    subject(:color) { formatter.send(:color, message, color_code) }
+
+    let(:message) { 'test message' }
+
+    context 'when the color code is :white_on_red' do
+      let(:color_code) { :white_on_red }
+
+      it 'returns a string for white font on a red background' do
+        expect(color).to eq("\e[4;37;41m#{message}\e[0m")
       end
     end
   end
