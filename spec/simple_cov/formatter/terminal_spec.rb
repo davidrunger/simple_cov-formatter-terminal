@@ -153,20 +153,41 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       end
     end
 
-    context 'when the executed spec file is an admin controller test' do
+    context 'when a SIMPLECOV_TARGET_FILE env var is not present' do
       before do
         expect(SimpleCov::Formatter::Terminal).
           to receive(:executed_spec_files).
           at_least(:once).
-          and_return(['spec/controllers/admin/csp_reports_controller_spec.rb'])
+          and_return([executed_spec_file])
 
-        expect(SimpleCov::Formatter::Terminal).
+        allow(SimpleCov::Formatter::Terminal).
           to receive(:spec_file_to_application_file_map).
           and_return(SimpleCov::Formatter::Terminal::SPEC_TO_APP_DEFAULT_MAP)
       end
 
-      it 'returns the correct Active Admin file' do
-        expect(targeted_application_file).to eq('app/admin/csp_reports.rb')
+      context 'when the executed spec file is an admin controller test' do
+        let(:executed_spec_file) { 'spec/controllers/admin/csp_reports_controller_spec.rb' }
+
+        it 'returns the correct Active Admin file' do
+          expect(targeted_application_file).to eq('app/admin/csp_reports.rb')
+        end
+      end
+
+      context 'when the executed spec file is a feature test' do
+        let(:executed_spec_file) { 'spec/features/home_spec.rb' }
+
+        it 'returns nil' do
+          expect(targeted_application_file).to eq(nil)
+        end
+      end
+
+      context 'when the executed spec file is not matched by any regex' do
+        let(:executed_spec_file) { 'spec/dont_know/how_to/map_this_spec.rb' }
+
+        it 'raises an error' do
+          expect { targeted_application_file }.
+            to raise_error(/Could not map executed spec file .* to application file!/)
+        end
       end
     end
   end
@@ -464,6 +485,14 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
       it 'returns a string for white font on a red background' do
         expect(color).to eq("\e[4;37;41m#{message}\e[0m")
+      end
+    end
+
+    context 'when the color code is :purple' do
+      let(:color_code) { :purple }
+
+      it 'raises an error' do
+        expect { color }.to raise_error("Unknown color format 'purple'.")
       end
     end
   end
