@@ -42,7 +42,18 @@ simply running `bin/rspec` without any argument).
 ### Modifying the `spec_file_to_application_file_map`
 
 `SimpleCov::Formatter::Terminal` has a default hash that is used to map spec files to their
-corresponding application file. This default is optimized for Rails applications using Active Admin.
+corresponding application file.
+
+For gems (determined from whether there is a `.gemspec` file at the top level of the project), the
+default mapping is very simple:
+
+```rb
+SimpleCov::Formatter::Terminal.spec_file_to_application_file_map = {
+  %r{\Aspec/} => 'lib/',
+}
+```
+
+This is the default used for non-gems; it is optimized for Rails applications using Active Admin:
 
 ```rb
 SimpleCov::Formatter::Terminal.spec_file_to_application_file_map = {

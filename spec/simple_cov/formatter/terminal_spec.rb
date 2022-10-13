@@ -4,6 +4,8 @@ RSpec.describe SimpleCov::Formatter::Terminal do
   subject(:formatter) { SimpleCov::Formatter::Terminal.allocate }
 
   describe '::_setup_rspec' do
+    subject(:_setup_rspec) { SimpleCov::Formatter::Terminal.send(:_setup_rspec) }
+
     it 'calls the expected methods' do
       expect(RSpec).to receive(:configure) do |&block|
         double = instance_double(RSpec::Core::Configuration)
@@ -25,7 +27,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         block.call(double)
       end
 
-      SimpleCov::Formatter::Terminal._setup_rspec
+      _setup_rspec
     end
   end
 
@@ -83,6 +85,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
         it 'does not print coverage details' do
           expect(formatter).not_to receive(:print_coverage_details)
+          expect(formatter).to receive(:puts) # suppress actual output
           format
         end
 
@@ -98,6 +101,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         context 'when test coverage is 100%' do
           it 'does not print coverage details' do
             expect(formatter).not_to receive(:print_coverage_details).and_call_original
+            expect(formatter).to receive(:puts) # suppress actual output
             format
           end
         end
@@ -145,7 +149,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
         expect(SimpleCov::Formatter::Terminal).
           to receive(:spec_file_to_application_file_map).
-          and_return(SimpleCov::Formatter::Terminal::DEFAULT_SPEC_TO_APP_MAP)
+          and_return(SimpleCov::Formatter::Terminal::SPEC_TO_APP_DEFAULT_MAP)
       end
 
       it 'returns the correct Active Admin file' do
@@ -241,6 +245,34 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       expect(formatter).to receive(:puts).with(/Looked for .* but it does not exist/)
 
       print_info_for_nonexistent_application_target
+    end
+  end
+
+  describe '::gem?' do
+    subject(:gem?) { SimpleCov::Formatter::Terminal.send(:gem?) }
+
+    context 'when there is a gemspec file' do
+      it 'returns true' do
+        expect(gem?).to eq(true)
+      end
+    end
+  end
+
+  describe '::default_map' do
+    subject(:default_map) { SimpleCov::Formatter::Terminal.send(:default_map) }
+
+    context 'when within a gem' do
+      it 'returns the SPEC_TO_GEM_DEFAULT_MAP' do
+        expect(default_map).to eq(SimpleCov::Formatter::Terminal::SPEC_TO_GEM_DEFAULT_MAP)
+      end
+    end
+
+    context 'when not within a gem' do
+      before { expect(SimpleCov::Formatter::Terminal).to receive(:gem?).and_return(false) }
+
+      it 'returns the SPEC_TO_GEM_DEFAULT_MAP' do
+        expect(default_map).to eq(SimpleCov::Formatter::Terminal::SPEC_TO_APP_DEFAULT_MAP)
+      end
     end
   end
 end
