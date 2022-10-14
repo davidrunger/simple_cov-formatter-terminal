@@ -1,6 +1,7 @@
 # SimpleCov::Formatter::Terminal
 
-![image](https://user-images.githubusercontent.com/8197963/195740768-e2cbb99d-7cf2-42bf-a178-2f78eb653dd3.png)
+[//]: # (https://forum.gitlab.com/t/readme-markdown-images-prevent-link/46468/2)
+<a>![Screenshot of SimpleCov::Formatter::Terminal](https://user-images.githubusercontent.com/8197963/195740768-e2cbb99d-7cf2-42bf-a178-2f78eb653dd3.png)</a>
 
 ## Installation
 
