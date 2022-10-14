@@ -3,6 +3,14 @@
 RSpec.describe SimpleCov::Formatter::Terminal do
   subject(:formatter) { SimpleCov::Formatter::Terminal.new }
 
+  around do |example|
+    ClimateControl.modify(SIMPLECOV_WRITE_TARGET_TO_FILE: nil) do
+      example.run
+    end
+  end
+
+  before { allow(formatter).to receive(:write_target_info_file) } # don't actually write to file
+
   describe '::_setup_rspec' do
     subject(:_setup_rspec) { SimpleCov::Formatter::Terminal.send(:_setup_rspec) }
 
@@ -112,7 +120,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         before { expect(SimpleCov::Formatter::Terminal.failure_occurred).to eq(false) }
 
         context 'when test coverage is 100%' do
-          context 'when SIMPLECOV_TARGET_FILE env var is not set' do
+          context 'when SIMPLECOV_FORCE_DETAILS env var is not set' do
             around do |example|
               ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: nil) do
                 example.run
@@ -126,7 +134,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
             end
           end
 
-          context 'when SIMPLECOV_TARGET_FILE env var is set to 1' do
+          context 'when SIMPLECOV_FORCE_DETAILS env var is set to 1' do
             around do |example|
               ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: '1') do
                 example.run
@@ -146,10 +154,24 @@ RSpec.describe SimpleCov::Formatter::Terminal do
             { 'lines' => [nil, nil, 1, 2, 0, 1] }
           end
 
+          before { expect(formatter).to receive(:puts).at_least(:once) } # suppress actual output
+
           it 'prints coverage details' do
             expect(formatter).to receive(:print_coverage_details).and_call_original
-            expect(formatter).to receive(:puts).at_least(:once) # suppress actual output
             format
+          end
+
+          context 'when the SIMPLECOV_WRITE_TARGET_TO_FILE env var is 1' do
+            around do |example|
+              ClimateControl.modify(SIMPLECOV_WRITE_TARGET_TO_FILE: '1') do
+                example.run
+              end
+            end
+
+            it 'calls #write_target_info_file' do
+              expect(formatter).to receive(:write_target_info_file)
+              format
+            end
           end
         end
       end
@@ -220,7 +242,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
     let(:line) do
       instance_double(
         SimpleCov::SourceFile::Line,
-        line_number: 1,
+        line_number:,
         skipped?: false,
         src: "# frozen_string_literal\n",
         coverage:,
@@ -234,6 +256,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       )
     end
     let(:branches) { [] }
+    let(:line_number) { 1 }
 
     before do
       expect(formatter).to receive(:targeted_application_file).and_return('app/some/file.rb')
@@ -299,6 +322,18 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       it 'returns the source line number in white font on a red background' do
         expect(colored_line).
           to start_with("\e[1;37;41m \e[0m\e[1;37;41m  1\e[0m\e[1;37;41m \e[0m")
+      end
+
+      context 'when the SIMPLECOV_WRITE_TARGET_TO_FILE env var is 1' do
+        around do |example|
+          ClimateControl.modify(SIMPLECOV_WRITE_TARGET_TO_FILE: '1') do
+            example.run
+          end
+        end
+
+        it 'prints the source line number preceded by 3 colons' do
+          expect(colored_line).to include(":::#{line_number}".rjust(6, ' '))
+        end
       end
     end
   end
@@ -501,6 +536,31 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
       it 'raises an error' do
         expect { color }.to raise_error("Unknown color format 'purple'.")
+      end
+    end
+  end
+
+  describe '#write_target_info_file' do
+    subject(:write_target_info_file) { formatter.send(:write_target_info_file) }
+
+    before { allow(formatter).to receive(:write_target_info_file).and_call_original }
+
+    context 'when a target application file can be determined' do
+      before do
+        expect(formatter).
+          to receive(:targeted_application_file).
+          at_least(:once).
+          and_return(targeted_application_file)
+      end
+
+      let(:targeted_application_file) { 'lib/simple_cov/formatter/terminal.rb' }
+
+      it 'writes the targeted file name to .simplecov_target' do
+        expect(File).
+          to receive(:write).
+          with('./.simplecov_target', "#{targeted_application_file}\n")
+
+        write_target_info_file
       end
     end
   end

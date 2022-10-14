@@ -93,6 +93,7 @@ class SimpleCov::Formatter::Terminal
     if targeted_application_file.nil?
       print_info_for_undetermined_application_target
     elsif File.exist?(targeted_application_file)
+      write_target_info_file if write_target_info_file?
       print_coverage_info(result)
     else
       print_info_for_nonexistent_application_target
@@ -101,23 +102,30 @@ class SimpleCov::Formatter::Terminal
 
   private
 
+  memoize \
+  def write_target_info_file?
+    ENV.fetch('SIMPLECOV_WRITE_TARGET_TO_FILE', nil) == '1'
+  end
+
+  def write_target_info_file
+    File.write('./.simplecov_target', "#{targeted_application_file}\n")
+  end
+
   def print_coverage_info(result)
     sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
+    force_coverage = ENV.fetch('SIMPLECOV_FORCE_DETAILS', nil) == '1'
+
     if sourcefile.nil?
       puts(<<~LOG.squish)
         No code coverage info was found for "#{targeted_application_file}". Try stopping and
         disabling `spring`, if you are using it, and then rerun the spec.
       LOG
-    elsif self.class.failure_occurred
+    elsif self.class.failure_occurred && !force_coverage
       puts(<<~LOG.squish)
         Test coverage: #{colorized_coverage(sourcefile.covered_percent)}.
         Not showing detailed test coverage because an example failed.
       LOG
-    elsif (
-      sourcefile.covered_percent < 100 ||
-        uncovered_branches(sourcefile).any? ||
-        ENV.fetch('SIMPLECOV_FORCE_DETAILS', nil) == '1'
-    )
+    elsif sourcefile.covered_percent < 100 || uncovered_branches(sourcefile).any? || force_coverage
       print_coverage_details(sourcefile)
     else
       puts(<<~LOG.squish)
@@ -236,9 +244,16 @@ class SimpleCov::Formatter::Terminal
       else color(' ', :white_on_green)
       end
 
+    line_number_string =
+      if write_target_info_file?
+        ":::#{line_number}".rjust(6, ' ')
+      else
+        line_number.to_s.rjust(3, ' ')
+      end
+
     output =
       colored_space +
-      color(line_number.to_s.rjust(3, ' '), color) +
+      color(line_number_string, color) +
       colored_space +
       ' ' +
       source_code
