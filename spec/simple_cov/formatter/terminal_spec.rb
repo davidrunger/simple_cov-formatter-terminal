@@ -128,9 +128,34 @@ RSpec.describe SimpleCov::Formatter::Terminal do
             end
 
             it 'does not print coverage details' do
-              expect(formatter).not_to receive(:print_coverage_details).and_call_original
-              expect(formatter).to receive(:puts) # suppress actual output
+              expect(formatter).not_to receive(:print_coverage_details)
+              expect(formatter).to receive(:print_coverage_summary)
               format
+            end
+
+            context 'when branch coverage is enabled' do
+              before { expect(SimpleCov).to receive(:branch_coverage?).and_return(true) }
+
+              it 'includes info about the branch coverage' do
+                expect(formatter).
+                  to receive(:puts).
+                  at_least(:once).
+                  with(/\e\[1;32;49m\d+\e\[0m uncovered branches/)
+
+                format
+              end
+            end
+
+            context 'when branch coverage is not enabled' do
+              before { expect(SimpleCov).to receive(:branch_coverage?).and_return(false) }
+
+              it 'does not include info about branch coverage' do
+                expect(formatter).
+                  not_to receive(:puts).
+                  with(/branches/)
+
+                format
+              end
             end
           end
 
