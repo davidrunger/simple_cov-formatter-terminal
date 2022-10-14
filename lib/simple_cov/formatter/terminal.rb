@@ -128,14 +128,20 @@ class SimpleCov::Formatter::Terminal
     elsif sourcefile.covered_percent < 100 || uncovered_branches(sourcefile).any? || force_coverage
       print_coverage_details(sourcefile)
     else
-      puts(<<~LOG.squish)
-        Test coverage is
-        #{colorized_coverage(sourcefile.covered_percent)}
+      print_coverage_summary(sourcefile)
+    end
+  end
+
+  def print_coverage_summary(sourcefile)
+    summary = +"Test coverage is #{colorized_coverage(sourcefile.covered_percent)} "
+    if SimpleCov.branch_coverage?
+      summary << <<~LOG.squish
         and there are
         #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)} uncovered branches
-        for #{targeted_application_file}. Good job!
       LOG
     end
+    summary << " for #{targeted_application_file}. Good job!"
+    puts(summary.squish)
   end
 
   memoize \
