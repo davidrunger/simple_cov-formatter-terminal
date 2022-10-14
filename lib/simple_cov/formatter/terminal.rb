@@ -113,7 +113,11 @@ class SimpleCov::Formatter::Terminal
         Test coverage: #{colorized_coverage(sourcefile.covered_percent)}.
         Not showing detailed test coverage because an example failed.
       LOG
-    elsif sourcefile.covered_percent < 100 || uncovered_branches(sourcefile).any?
+    elsif (
+      sourcefile.covered_percent < 100 ||
+        uncovered_branches(sourcefile).any? ||
+        ENV.fetch('SIMPLECOV_FORCE_DETAILS', nil) == '1'
+    )
       print_coverage_details(sourcefile)
     else
       puts(<<~LOG.squish)

@@ -112,10 +112,32 @@ RSpec.describe SimpleCov::Formatter::Terminal do
         before { expect(SimpleCov::Formatter::Terminal.failure_occurred).to eq(false) }
 
         context 'when test coverage is 100%' do
-          it 'does not print coverage details' do
-            expect(formatter).not_to receive(:print_coverage_details).and_call_original
-            expect(formatter).to receive(:puts) # suppress actual output
-            format
+          context 'when SIMPLECOV_TARGET_FILE env var is not set' do
+            around do |example|
+              ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: nil) do
+                example.run
+              end
+            end
+
+            it 'does not print coverage details' do
+              expect(formatter).not_to receive(:print_coverage_details).and_call_original
+              expect(formatter).to receive(:puts) # suppress actual output
+              format
+            end
+          end
+
+          context 'when SIMPLECOV_TARGET_FILE env var is set to 1' do
+            around do |example|
+              ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: '1') do
+                example.run
+              end
+            end
+
+            it 'prints coverage details' do
+              expect(formatter).to receive(:print_coverage_details).and_call_original
+              expect(formatter).to receive(:puts).at_least(:once) # suppress actual output
+              format
+            end
           end
         end
 
