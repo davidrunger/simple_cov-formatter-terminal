@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe SimpleCov::Formatter::Terminal do
-  subject(:formatter) { SimpleCov::Formatter::Terminal.allocate }
+  subject(:formatter) { SimpleCov::Formatter::Terminal.new }
 
   describe '::_setup_rspec' do
     subject(:_setup_rspec) { SimpleCov::Formatter::Terminal.send(:_setup_rspec) }
@@ -39,7 +39,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
   describe '#format' do
     subject(:format) { formatter.format(result) }
 
-    let(:result) { SimpleCov::Result.allocate }
+    let(:result) { instance_double(SimpleCov::Result) }
 
     context 'when a targeted application file cannot be determined' do
       before { expect(formatter).to receive(:targeted_application_file).and_return(nil) }
