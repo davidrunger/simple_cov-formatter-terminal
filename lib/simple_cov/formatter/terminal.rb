@@ -131,8 +131,9 @@ class SimpleCov::Formatter::Terminal
     sourcefile.branches.
       reject(&:covered?).
       reject do |branch|
-        source_code = sourcefile.lines[branch.start_line - 1].src
-        source_code.match?(/# :nocov-(else|when):/)
+        line = sourcefile.lines[branch.start_line - 1]
+        source_code = line.src
+        line.coverage == 0 || source_code.match?(/# :nocov-(else|when):/)
       end
   end
 
@@ -207,30 +208,44 @@ class SimpleCov::Formatter::Terminal
   def colored_line(line, sourcefile)
     colored_source_code = syntax_highlighted_source_lines[line.line_number - 1]
     missed_branch_info = missed_branch_info(line, sourcefile)
+    line_number = line.line_number
 
     case
     when line.skipped?
-      line_output('░', :gray, colored_source_code)
+      numbered_line_output(line_number, :white, colored_source_code)
     when line.coverage == 0
-      line_output('█', :red, colored_source_code, missed_branch_info)
+      numbered_line_output(line_number, :white_on_red, colored_source_code)
     when !missed_branch_info.empty?
-      line_output('▒', :yellow, colored_source_code, missed_branch_info)
+      numbered_line_output(line_number, :red_on_yellow, colored_source_code, missed_branch_info)
     when line.coverage.nil?
-      line_output('░', :gray, colored_source_code, missed_branch_info)
+      numbered_line_output(line_number, :white, colored_source_code, missed_branch_info)
     else
-      line_output('█', :green, colored_source_code, missed_branch_info)
+      numbered_line_output(line_number, :green, colored_source_code, missed_branch_info)
     end
   end
 
-  def line_output(leading_box, box_color, source_code, missed_branch_info = '')
-    # rubocop:disable Style/StringConcatenation
-    output = color(leading_box * 2, box_color) + ' ' + source_code
-    if !missed_branch_info.empty?
+  # rubocop:disable Style/StringConcatenation
+  def numbered_line_output(line_number, color, source_code, missed_branch_info = nil)
+    colored_space =
+      case color
+      when :red_on_yellow, :white_on_red then color(' ', color)
+      else color(' ', :white_on_green)
+      end
+
+    output =
+      colored_space +
+      color(line_number.to_s.rjust(3, ' '), color) +
+      colored_space +
+      ' ' +
+      source_code
+
+    if missed_branch_info
       output << " #{color(missed_branch_info, :white_on_red)}"
     end
+
     output
-    # rubocop:enable Style/StringConcatenation
   end
+  # rubocop:enable Style/StringConcatenation
 
   def missed_branch_info(line, sourcefile)
     uncovered_branches(sourcefile).
@@ -248,16 +263,20 @@ class SimpleCov::Formatter::Terminal
     highlighted_source.split("\n")
   end
 
+  # rubocop:disable Metrics/CyclomaticComplexity
   def color(message, color)
     case color
-    when :gray then "\e[0;30m#{message}\e[0m"
+    when :white then "\e[0;37;49m#{message}\e[0m"
     when :red then "\e[0;31m#{message}\e[0m"
-    when :green then "\e[0;32m#{message}\e[0m"
+    when :green then "\e[1;32;49m#{message}\e[0m"
     when :yellow then "\e[0;33m#{message}\e[0m"
-    when :white_on_red then "\e[4;37;41m#{message}\e[0m"
+    when :white_on_green then "\e[1;39;102m#{message}\e[0m"
+    when :red_on_yellow then "\e[0;31;103m#{message}\e[0m"
+    when :white_on_red then "\e[1;37;41m#{message}\e[0m"
     else raise("Unknown color format '#{color}'.")
     end
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   def colorized_coverage(covered_percent)
     case

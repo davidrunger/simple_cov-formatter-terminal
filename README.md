@@ -1,6 +1,6 @@
 # SimpleCov::Formatter::Terminal
 
-![image](https://user-images.githubusercontent.com/8197963/194628739-7f51e575-0c74-4325-87b7-a0422b9548a1.png)
+![image](https://user-images.githubusercontent.com/8197963/195740768-e2cbb99d-7cf2-42bf-a178-2f78eb653dd3.png)
 
 ## Installation
 

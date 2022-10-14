@@ -256,24 +256,27 @@ RSpec.describe SimpleCov::Formatter::Terminal do
     context 'when the line coverage is nil' do
       let(:coverage) { nil }
 
-      it 'returns the source line with a gray box at the beginning' do
-        expect(colored_line).to start_with("\e[0;30m░░\e[0m ")
+      it 'returns the source line number in white font with green boundaries' do
+        expect(colored_line).
+          to start_with("\e[1;39;102m \e[0m\e[0;37;49m  1\e[0m\e[1;39;102m \e[0m")
       end
     end
 
     context 'when the line coverage is >= 1' do
       let(:coverage) { 1 }
 
-      it 'returns the source line with a green box at the beginning' do
-        expect(colored_line).to start_with("\e[0;32m██\e[0m ")
+      it 'returns the source line number in green font with green boundaries' do
+        expect(colored_line).
+          to start_with("\e[1;39;102m \e[0m\e[1;32;49m  1\e[0m\e[1;39;102m \e[0m")
       end
     end
 
     context 'when the line coverage is 0' do
       let(:coverage) { 0 }
 
-      it 'returns the source line with a red box at the beginning' do
-        expect(colored_line).to start_with("\e[0;31m██\e[0m ")
+      it 'returns the source line number in white font on a red background' do
+        expect(colored_line).
+          to start_with("\e[1;37;41m \e[0m\e[1;37;41m  1\e[0m\e[1;37;41m \e[0m")
       end
     end
   end
@@ -301,7 +304,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:covered_percent) { 100.0 }
 
       it 'returns a string with the percentage rounded and in green' do
-        expect(colorized_coverage).to eq("\e[0;32m100.0%\e[0m")
+        expect(colorized_coverage).to eq("\e[1;32;49m100.0%\e[0m")
       end
     end
   end
@@ -387,7 +390,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:num_uncovered_branches) { 0 }
 
       it 'prints 0 in green' do
-        expect(colorized_uncovered_branches).to eq("\e[0;32m0\e[0m")
+        expect(colorized_uncovered_branches).to eq("\e[1;32;49m0\e[0m")
       end
     end
 
@@ -458,25 +461,6 @@ RSpec.describe SimpleCov::Formatter::Terminal do
     end
   end
 
-  describe '#line_output' do
-    subject(:line_output) do
-      formatter.send(:line_output, leading_box, box_color, source_code, missed_branch_info)
-    end
-
-    let(:leading_box) { '▒' }
-    let(:box_color) { :yellow }
-    let(:source_code) { "\e[38;5;252m    \e[39m\e[38;5;139mcase\e[39m\e[38;5;252m\e[39m" }
-    let(:missed_branch_info) { '' }
-
-    context 'when there is missed branch info' do
-      let(:missed_branch_info) { 'else' }
-
-      it 'returns a string with the missed branch info' do
-        expect(line_output).to end_with(" \e[4;37;41m#{missed_branch_info}\e[0m")
-      end
-    end
-  end
-
   describe '#color' do
     subject(:color) { formatter.send(:color, message, color_code) }
 
@@ -486,7 +470,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       let(:color_code) { :white_on_red }
 
       it 'returns a string for white font on a red background' do
-        expect(color).to eq("\e[4;37;41m#{message}\e[0m")
+        expect(color).to eq("\e[1;37;41m#{message}\e[0m")
       end
     end
 
