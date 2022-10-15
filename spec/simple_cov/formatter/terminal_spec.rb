@@ -580,10 +580,10 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
       let(:targeted_application_file) { 'lib/simple_cov/formatter/terminal.rb' }
 
-      it 'writes the targeted file name to .simplecov_target' do
+      it 'writes the targeted file name to tmp/simple_cov/formatter/terminal/target.txt' do
         expect(File).
           to receive(:write).
-          with('./.simplecov_target', "#{targeted_application_file}\n")
+          with('tmp/simple_cov/formatter/terminal/target.txt', "#{targeted_application_file}\n")
 
         write_target_info_file
       end
