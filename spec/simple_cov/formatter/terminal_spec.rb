@@ -104,15 +104,25 @@ RSpec.describe SimpleCov::Formatter::Terminal do
           SimpleCov::Formatter::Terminal.failure_occurred = false
         end
 
-        it 'does not print coverage details' do
-          expect(formatter).not_to receive(:print_coverage_details)
-          expect(formatter).to receive(:puts) # suppress actual output
-          format
-        end
+        context 'when SIMPLECOV_FORCE_DETAILS env var is not set' do
+          around do |example|
+            ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: nil) do
+              example.run
+            end
+          end
 
-        it 'says why it is not printing coverage details' do
-          expect(formatter).to receive(:puts).with(/Not showing detailed test coverage because .+/)
-          format
+          it 'does not print coverage details' do
+            expect(formatter).not_to receive(:print_coverage_details)
+            expect(formatter).to receive(:puts) # suppress actual output
+            format
+          end
+
+          it 'says why it is not printing coverage details' do
+            expect(formatter).
+              to receive(:puts).
+              with(/Not showing detailed test coverage because .+/)
+            format
+          end
         end
       end
 
