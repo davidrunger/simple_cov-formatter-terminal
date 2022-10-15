@@ -612,4 +612,62 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       end
     end
   end
+
+  describe '#uncovered_branches' do
+    subject(:uncovered_branches) { formatter.send(:uncovered_branches, sourcefile) }
+
+    let(:sourcefile) do
+      instance_double(
+        SimpleCov::SourceFile,
+        lines:,
+        branches: [branch],
+      )
+    end
+    let(:lines) do
+      [
+        instance_double(
+          SimpleCov::SourceFile::Line,
+          skipped?: false,
+          src: line_source,
+          coverage: line_coverage,
+        ),
+      ]
+    end
+    let(:branch) do
+      instance_double(
+        SimpleCov::SourceFile::Branch,
+        coverage: 0,
+        end_line: 1,
+        inline?: true,
+        skipped?: false,
+        covered?: false,
+        start_line: 1,
+        type: branch_type,
+      )
+    end
+
+    context 'when the line is (partially) covered' do
+      let(:line_coverage) { 1 }
+
+      context 'when there is an uncovered `else` branch' do
+        let(:branch_type) { :else }
+
+        context 'when there is a comment ignoring `else` branch coverage' do
+          let(:line_source) { "if rand(10) < 5 ? 'small' : 'big' \# :nocov-else:" }
+
+          it 'does not include the branch' do
+            expect(uncovered_branches).not_to include(branch)
+          end
+        end
+
+        context 'when there is a comment ignoring `when` branch coverage' do
+          let(:line_source) { "if rand(10) < 5 ? 'small' : 'big' \# :nocov-when:" }
+
+          it 'includes the branch' do
+            expect(uncovered_branches).to include(branch)
+          end
+        end
+      end
+    end
+  end
 end
