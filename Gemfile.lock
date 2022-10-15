@@ -11,7 +11,7 @@ PATH
       activesupport (>= 7.0.4, < 8)
       memoist (>= 0.16.2, < 1)
       rouge (>= 4.0.0, < 5)
-      rspec (>= 3.11.0, < 4)
+      rspec-core (>= 3.11.0, < 4)
       simplecov (>= 0.21.2, < 1)
 
 GEM
