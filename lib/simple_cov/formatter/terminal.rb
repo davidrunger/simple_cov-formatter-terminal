@@ -83,7 +83,8 @@ class SimpleCov::Formatter::Terminal
     end
 
     def default_map
-      gem? ? SPEC_TO_GEM_DEFAULT_MAP : SPEC_TO_APP_DEFAULT_MAP
+      # dup the maps because the maps are frozen but we want to allow the user to customize them
+      gem? ? SPEC_TO_GEM_DEFAULT_MAP.dup : SPEC_TO_APP_DEFAULT_MAP.dup
     end
   end
 
