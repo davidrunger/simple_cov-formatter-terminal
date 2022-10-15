@@ -108,7 +108,9 @@ class SimpleCov::Formatter::Terminal
   end
 
   def write_target_info_file
-    File.write('./.simplecov_target', "#{targeted_application_file}\n")
+    directory = 'tmp/simple_cov/formatter/terminal'
+    FileUtils.mkdir_p(directory)
+    File.write("#{directory}/target.txt", "#{targeted_application_file}\n")
   end
 
   def print_coverage_info(result)
