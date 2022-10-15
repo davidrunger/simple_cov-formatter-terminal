@@ -127,10 +127,7 @@ class SimpleCov::Formatter::Terminal
         disabling `spring`, if you are using it, and then rerun the spec.
       LOG
     elsif self.class.failure_occurred && !force_coverage
-      puts(<<~LOG.squish)
-        Test coverage: #{colorized_coverage(sourcefile.covered_percent)}.
-        Not showing detailed test coverage because an example failed.
-      LOG
+      print_coverage_summary(sourcefile, 'Not showing detailed coverage because an example failed.')
     elsif sourcefile.covered_percent < 100 || uncovered_branches(sourcefile).any? || force_coverage
       print_coverage_details(sourcefile)
     else
@@ -138,16 +135,19 @@ class SimpleCov::Formatter::Terminal
     end
   end
 
-  def print_coverage_summary(sourcefile)
-    summary = +"Test coverage is #{colorized_coverage(sourcefile.covered_percent)} "
+  def print_coverage_summary(sourcefile, log_addendum = nil)
+    summary = +"-- Coverage for #{targeted_application_file} --\n"
+    summary << "Line coverage: #{colorized_coverage(sourcefile.covered_percent)}"
     if SimpleCov.branch_coverage?
-      summary << <<~LOG.squish
-        and there are
-        #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)} uncovered branches
+      summary << ' '
+      summary << <<~LOG
+        | Uncovered branches: #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)}
       LOG
+    else
+      summary << "\n"
     end
-    summary << " for #{targeted_application_file}. Good job!"
-    puts(summary.squish)
+    summary << log_addendum if log_addendum
+    puts(summary)
   end
 
   memoize \
