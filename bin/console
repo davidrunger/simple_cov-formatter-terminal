@@ -4,12 +4,12 @@
 require 'bundler/setup'
 require 'simple_cov/formatter/terminal'
 
-# You can add fixtures and/or initialization code here to make experimenting
-# with your gem easier. You can also use a different console, if you like.
-
-# (If you use this, don't forget to add pry to your Gemfile!)
-# require "pry"
-# Pry.start
+# https://github.com/rspec/rspec-rails/issues/1645#issuecomment-229112723
+# rubocop:disable Style/SymbolProc
+RSpec.configure do |config|
+  config.disable_monkey_patching!
+end
+# rubocop:enable Style/SymbolProc
 
 require 'irb'
 IRB.start(__FILE__)
