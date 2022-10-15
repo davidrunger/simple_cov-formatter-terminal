@@ -4,6 +4,7 @@ require_relative 'terminal/version'
 require 'active_support/core_ext/string/filters'
 require 'memoist'
 require 'rouge'
+require 'rspec/core'
 
 class SimpleCov::Formatter::Terminal
   extend Memoist
