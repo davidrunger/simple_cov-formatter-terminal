@@ -133,7 +133,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
           it 'says why it is not printing coverage details' do
             expect(formatter).
               to receive(:puts).
-              with(/Not showing detailed test coverage because .+/)
+              with(/Not showing detailed coverage because .+/)
             format
           end
         end
@@ -163,7 +163,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
                 expect(formatter).
                   to receive(:puts).
                   at_least(:once).
-                  with(/\e\[1;32;49m\d+\e\[0m uncovered branches/)
+                  with(/Uncovered branches: \e\[1;32;49m0\e\[0m/)
 
                 format
               end
