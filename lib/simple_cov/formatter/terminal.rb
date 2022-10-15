@@ -90,7 +90,9 @@ class SimpleCov::Formatter::Terminal
   self.unmappable_spec_regexes ||= DEFAULT_UNMAPPABLE_SPEC_REGEXES
 
   def format(result)
-    if targeted_application_file.nil?
+    if self.class.executed_spec_files.nil?
+      print_info_for_no_executed_specs
+    elsif targeted_application_file.nil?
       print_info_for_undetermined_application_target
     elsif File.exist?(targeted_application_file)
       write_target_info_file if write_target_info_file?
@@ -169,6 +171,10 @@ class SimpleCov::Formatter::Terminal
       Uncovered branches: #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)}
       ----
     LOG
+  end
+
+  def print_info_for_no_executed_specs
+    puts('Not showing test coverage details because no specs were executed successfully.')
   end
 
   def print_info_for_undetermined_application_target

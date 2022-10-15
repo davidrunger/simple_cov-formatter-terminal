@@ -49,6 +49,19 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
     let(:result) { instance_double(SimpleCov::Result) }
 
+    context 'when no specs have been successfully executed' do
+      before do
+        expect(SimpleCov::Formatter::Terminal).
+          to receive(:executed_spec_files).
+          and_return(nil)
+      end
+
+      it 'prints a message about no specs having been executed' do
+        expect(formatter).to receive(:puts).with(/no specs were executed successfully/)
+        format
+      end
+    end
+
     context 'when a targeted application file cannot be determined' do
       before { expect(formatter).to receive(:targeted_application_file).and_return(nil) }
 
