@@ -27,16 +27,16 @@ Add something like the following to your `spec/spec_helper.rb` file:
 
 ```rb
 require 'simplecov'
-if ARGV.grep(%r{\Aspec/.+_spec\.rb}).size == 1
+if RSpec.configuration.files_to_run.one?
   require 'simple_cov/formatter/terminal'
   SimpleCov.formatter = SimpleCov::Formatter::Terminal
 end
 SimpleCov.start
 ```
 
-**Note** that this setup only uses `SimpleCov::Formatter::Terminal` as the SimpleCov formatter when
-specs are run with a single spec file (e.g. `bin/rspec spec/models/user_spec.rb`) and not when
-multiple specs are executed (e.g. when simply running `bin/rspec` without any argument).
+**Note** that this setup only uses `SimpleCov::Formatter::Terminal` when specs are run with a single
+spec file (e.g. `bin/rspec spec/models/user_spec.rb`) and not when multiple specs are executed (e.g.
+when simply running `bin/rspec` without any argument).
 
 ### Modifying the `spec_file_to_application_file_map`
 
