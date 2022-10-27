@@ -5,7 +5,7 @@ require 'simplecov'
 if ENV.fetch('CI', nil) == 'true'
   require 'codecov'
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
-elsif ARGV.grep(%r{\Aspec/.+_spec\.rb}).size == 1
+elsif RSpec.configuration.files_to_run.one?
   require 'simple_cov/formatter/terminal'
   SimpleCov.formatter = SimpleCov::Formatter::Terminal
 end
