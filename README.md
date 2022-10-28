@@ -95,6 +95,17 @@ SimpleCov::Formatter::Terminal.spec_file_to_application_file_map = {
 }
 ```
 
+## Branch coverage
+
+If you enable branch coverage for SimpleCov (via `enable_coverage(:branch)` within your
+`SimpleCov.start` block; read more [here][simple-cov-branch-coverage]), then branch coverage info
+will be included in SimpleCov::Formatter::Terminal's output. Missed branches will be indicated with
+white text on a red background at the end of the line, and the line number will be printed in red
+text on a yellow background, as seen in the screenshot at the top of this README (where a `then`
+branch is not covered on line 18).
+
+[simple-cov-branch-coverage]: https://github.com/simplecov-ruby/simplecov#branch-coverage-ruby--25
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/rspec` to run
