@@ -1,20 +1,18 @@
 # frozen_string_literal: true
 
-require 'climate_control'
 require 'simplecov'
-if ENV.fetch('CI', nil) == 'true'
-  require 'codecov'
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
-elsif RSpec.configuration.files_to_run.one?
-  require 'simple_cov/formatter/terminal'
-  SimpleCov.formatter = SimpleCov::Formatter::Terminal
-end
 SimpleCov.start do
   add_filter(%r{\A/spec/})
   enable_coverage(:branch)
 end
-
-load 'simple_cov/formatter/terminal.rb'
+require 'simple_cov/formatter/terminal'
+if ENV.fetch('CI', nil) == 'true'
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+elsif RSpec.configuration.files_to_run.one?
+  SimpleCov.formatter = SimpleCov::Formatter::Terminal
+end
+require 'climate_control'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
