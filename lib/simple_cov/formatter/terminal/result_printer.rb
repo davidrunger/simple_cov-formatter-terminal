@@ -1,22 +1,29 @@
 # frozen_string_literal: true
 
 require_relative './branch_coverage'
-require_relative './print_utils'
+require_relative './color_printing'
+require_relative './line_printer'
+require_relative './target_file_writer'
 
-module PrintCommands
-  include BranchCoverage
-  include PrintUtils
+class SimpleCov::Formatter::Terminal::ResultPrinter
+  extend Forwardable
+  extend Memoist
+  include SimpleCov::Formatter::Terminal::BranchCoverage
+  include SimpleCov::Formatter::Terminal::ColorPrinting
+
+  def_delegators(:@file_determiner, :executed_spec_file, :targeted_application_file)
+
+  def initialize(file_determiner)
+    @file_determiner = file_determiner
+  end
 
   def print_coverage_info(result)
     sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
     force_coverage = ENV.fetch('SIMPLECOV_FORCE_DETAILS', nil) == '1'
 
     if sourcefile.nil?
-      puts(<<~LOG.squish)
-        No code coverage info was found for "#{targeted_application_file}". Try stopping and
-        disabling `spring`, if you are using it, and then rerun the spec.
-      LOG
-    elsif self.class.failure_occurred && !force_coverage
+      print_no_coverage_info_found
+    elsif failure_occurred? && !force_coverage
       print_coverage_summary(sourcefile, 'Not showing detailed coverage because an example failed.')
     elsif sourcefile.covered_percent < 100 || uncovered_branches(sourcefile).any? || force_coverage
       print_coverage_details(sourcefile)
@@ -41,9 +48,13 @@ module PrintCommands
   end
 
   def print_coverage_details(sourcefile)
+    if SimpleCov::Formatter::Terminal.config.write_target_info_file?
+      target_file_writer.write_target_info_file
+    end
+
     puts("---- Coverage for #{targeted_application_file} ".ljust(80, '-').rstrip)
     sourcefile.lines.each do |line|
-      puts(colored_line(line, sourcefile))
+      puts(line_printer.colored_line(line, sourcefile))
     end
     puts(<<~LOG.squish)
       ----
@@ -51,6 +62,13 @@ module PrintCommands
       |
       Uncovered branches: #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)}
       ----
+    LOG
+  end
+
+  def print_no_coverage_info_found
+    puts(<<~LOG.squish)
+      No code coverage info was found for "#{targeted_application_file}". Try stopping and
+      disabling `spring`, if you are using it, and then rerun the spec.
     LOG
   end
 
@@ -73,5 +91,37 @@ module PrintCommands
       Cannot show code coverage. Looked for application file "#{targeted_application_file}",
       but it does not exist.
     LOG
+  end
+
+  private
+
+  def failure_occurred?
+    SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred?
+  end
+
+  memoize \
+  def target_file_writer
+    SimpleCov::Formatter::Terminal::TargetFileWriter.new(targeted_application_file)
+  end
+
+  def colorized_coverage(covered_percent)
+    case
+    when covered_percent >= 100 then color("#{covered_percent.round(2)}%", :green)
+    when covered_percent >= 80 then color("#{covered_percent.round(2)}%", :yellow)
+    else color("#{covered_percent.round(2)}%", :red)
+    end
+  end
+
+  def colorized_uncovered_branches(num_uncovered_branches)
+    case num_uncovered_branches
+    when 0 then color(num_uncovered_branches.to_s, :green)
+    when (1..3) then color(num_uncovered_branches.to_s, :yellow)
+    else color(num_uncovered_branches.to_s, :red)
+    end
+  end
+
+  memoize \
+  def line_printer
+    SimpleCov::Formatter::Terminal::LinePrinter.new(targeted_application_file)
   end
 end

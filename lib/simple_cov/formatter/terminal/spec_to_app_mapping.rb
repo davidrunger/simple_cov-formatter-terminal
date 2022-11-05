@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-module SpecToAppMaps
+require_relative './gem_awareness'
+
+module SimpleCov::Formatter::Terminal::SpecToAppMapping
   # rubocop:disable Lint/OrAssignmentToConstant
   SPEC_TO_APP_DEFAULT_MAP ||= {
     %r{\Aspec/lib/} => 'lib/',
@@ -31,4 +33,15 @@ module SpecToAppMaps
     %r{\Aspec/features/},
   ].freeze
   # rubocop:enable Lint/OrAssignmentToConstant
+
+  class << self
+    def default_spec_to_app_map
+      # dup the maps because the maps are frozen but we want to allow the user to customize them
+      if SimpleCov::Formatter::Terminal::GemAwareness.gem?
+        SPEC_TO_GEM_DEFAULT_MAP.dup
+      else
+        SPEC_TO_APP_DEFAULT_MAP.dup
+      end
+    end
+  end
 end

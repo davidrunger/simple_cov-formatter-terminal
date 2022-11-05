@@ -4,6 +4,8 @@
 
 ## Installation
 
+*Note:* This gem depends upon RSpec. If you aren't using RSpec to run your tests, it won't work!
+
 Add the gem to your application's `Gemfile`. Because the gem is not released via RubyGems, you will
 need to install it from GitHub.
 
@@ -38,7 +40,7 @@ SimpleCov.start
 spec file (e.g. `bin/rspec spec/models/user_spec.rb`) and not when multiple specs are executed (e.g.
 when simply running `bin/rspec` without any argument).
 
-### Modifying the `spec_file_to_application_file_map`
+### Modifying the `spec_to_app_file_map`
 
 `SimpleCov::Formatter::Terminal` has a default hash that is used to map spec files to their
 corresponding application file.
@@ -47,7 +49,7 @@ For gems (determined from whether there is a `.gemspec` file at the top level of
 default mapping is very simple:
 
 ```rb
-SimpleCov::Formatter::Terminal.spec_file_to_application_file_map = {
+SimpleCov::Formatter::Terminal.config.spec_to_app_file_map = {
   %r{\Aspec/} => 'lib/',
 }
 ```
@@ -55,7 +57,7 @@ SimpleCov::Formatter::Terminal.spec_file_to_application_file_map = {
 This is the default used for non-gems; it is optimized for Rails applications using Active Admin:
 
 ```rb
-SimpleCov::Formatter::Terminal.spec_file_to_application_file_map = {
+SimpleCov::Formatter::Terminal.config.spec_to_app_file_map = {
   %r{\Aspec/lib/} => 'lib/',
   %r{\Aspec/controllers/admin/(.*)_controller_spec.rb} => 'app/admin/\1.rb',
   %r{
@@ -82,7 +84,7 @@ SimpleCov::Formatter::Terminal.spec_file_to_application_file_map = {
 If needed for your application, you can add to this hash in your `spec/spec_helper.rb`, e.g.:
 
 ```rb
-SimpleCov::Formatter::Terminal.spec_file_to_application_file_map.merge!(
+SimpleCov::Formatter::Terminal.config.spec_to_app_file_map.merge!(
   %r{\Aspec/my_special/directory_structure/} => 'my_special/app_directory/',
 )
 ```
@@ -90,7 +92,7 @@ SimpleCov::Formatter::Terminal.spec_file_to_application_file_map.merge!(
 Or you can override the default mapping completely:
 
 ```rb
-SimpleCov::Formatter::Terminal.spec_file_to_application_file_map = {
+SimpleCov::Formatter::Terminal.config.spec_to_app_file_map = {
   %r{\Aspec/my_special/directory_structure/} => 'my_special/app_directory/',
 }
 ```

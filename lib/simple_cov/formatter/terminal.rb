@@ -1,51 +1,67 @@
 # frozen_string_literal: true
 
-require_relative 'terminal/file_determination'
-require_relative 'terminal/gem_awareness'
-require_relative 'terminal/print_commands'
+require_relative 'terminal/config'
+require_relative 'terminal/file_determiner'
+require_relative 'terminal/result_printer'
 require_relative 'terminal/r_spec_integration'
-require_relative 'terminal/spec_to_app_maps'
-require_relative 'terminal/target_file'
 require_relative 'terminal/version'
+require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/filters'
 require 'memoist'
 require 'rouge'
 require 'rspec/core'
+require 'simplecov'
 
 class SimpleCov::Formatter::Terminal
+  extend Forwardable
   extend Memoist
-  include FileDetermination
-  include PrintCommands
-  include SpecToAppMaps
-  include TargetFile
+
+  def_delegators(
+    :file_determiner,
+    :executed_spec_file,
+    :executed_spec_files,
+    :targeted_application_file,
+  )
+  def_delegators(
+    :result_printer,
+    :print_coverage_info,
+    :print_info_for_no_executed_specs,
+    :print_info_for_nonexistent_application_target,
+    :print_info_for_undetermined_application_target,
+  )
 
   class << self
-    include GemAwareness
-    include RSpecIntegration
+    extend Memoist
 
-    attr_accessor(
-      :executed_spec_files,
-      :failure_occurred,
-      :spec_file_to_application_file_map,
-      :unmappable_spec_regexes,
-    )
+    memoize \
+    def config
+      Config.new
+    end
   end
 
-  self.spec_file_to_application_file_map ||= default_map
-  self.unmappable_spec_regexes ||= DEFAULT_UNMAPPABLE_SPEC_REGEXES
-
   def format(result)
-    if self.class.executed_spec_files.nil?
+    if executed_spec_files.nil?
       print_info_for_no_executed_specs
     elsif targeted_application_file.nil?
       print_info_for_undetermined_application_target
     elsif File.exist?(targeted_application_file)
-      write_target_info_file if write_target_info_file?
       print_coverage_info(result)
     else
       print_info_for_nonexistent_application_target
     end
   end
+
+  private
+
+  memoize \
+  def file_determiner
+    SimpleCov::Formatter::Terminal::FileDeterminer.new
+  end
+
+  memoize \
+  def result_printer
+    SimpleCov::Formatter::Terminal::ResultPrinter.new(file_determiner)
+  end
 end
 
-SimpleCov::Formatter::Terminal.setup_rspec
+SimpleCov::Formatter::Terminal::RSpecIntegration.setup_rspec
