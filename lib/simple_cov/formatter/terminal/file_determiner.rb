@@ -2,26 +2,19 @@
 
 require 'memoist'
 
-module FileDetermination
+class SimpleCov::Formatter::Terminal::FileDeterminer
   extend Memoist
 
+  memoize \
   def executed_spec_file
-    if self.class.executed_spec_files.size == 1
-      self.class.executed_spec_files.first
+    if executed_spec_files.size == 1
+      executed_spec_files.first
     else
       raise(<<~ERROR)
-        Multiple spec files were executed (#{self.class.executed_spec_files}), but
+        Multiple spec files were executed (#{executed_spec_files}), but
         SimpleCov::Formatter::Terminal only works when a single spec file is executed.
       ERROR
     end
-  end
-
-  def spec_file_to_application_file_map
-    self.class.spec_file_to_application_file_map
-  end
-
-  def unmappable_spec_regexes
-    self.class.unmappable_spec_regexes
   end
 
   memoize \
@@ -34,11 +27,27 @@ module FileDetermination
 
     return nil if unmappable_spec_regexes.any? { executed_spec_file.match?(_1) }
 
-    spec_file_to_application_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
+    spec_to_app_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
       if executed_spec_file.match?(spec_file_regex)
         executed_spec_file.sub(spec_file_regex, app_file_substitution)
       end
     end.first&.sub(/_spec\.rb\z/, '.rb') ||
     raise("Could not map executed spec file #{executed_spec_file} to application file!")
+  end
+
+  memoize \
+  def executed_spec_files
+    SimpleCov::Formatter::Terminal::RSpecIntegration.executed_spec_files
+  end
+
+  memoize \
+  def spec_to_app_file_map
+    SimpleCov::Formatter::Terminal.config.spec_to_app_file_map ||
+    SimpleCov::Formatter::Terminal::SpecToAppMapping.default_spec_to_app_map
+  end
+
+  memoize \
+  def unmappable_spec_regexes
+    SimpleCov::Formatter::Terminal.config.unmappable_spec_regexes
   end
 end

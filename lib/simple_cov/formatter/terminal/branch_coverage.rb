@@ -2,8 +2,10 @@
 
 require 'memoist'
 
-module BranchCoverage
+module SimpleCov::Formatter::Terminal::BranchCoverage
   extend Memoist
+
+  private
 
   memoize \
   def uncovered_branches(sourcefile)
@@ -20,6 +22,7 @@ module BranchCoverage
     uncovered_branches(sourcefile).
       select { _1.start_line == line.line_number }.
       map { _1.type.to_s }.
-      join(', ')
+      join(', ').
+      presence
   end
 end

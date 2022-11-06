@@ -25,5 +25,15 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
+  config.mock_with(:rspec) do |mocks|
+    mocks.verify_partial_doubles = true
+  end
+
   config.filter_run_when_matching(:focus)
+
+  config.order = :random
+
+  config.before(:each) do
+    SimpleCov::Formatter::Terminal.config.flush_cache
+  end
 end
