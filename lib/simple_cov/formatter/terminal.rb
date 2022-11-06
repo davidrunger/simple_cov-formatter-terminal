@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+class SimpleCov::Formatter::Terminal ; end # rubocop:disable Lint/EmptyClass
+
 require_relative 'terminal/config'
 require_relative 'terminal/file_determiner'
 require_relative 'terminal/result_printer'
