@@ -101,7 +101,7 @@ RSpec.describe(SimpleCov::Formatter::Terminal::BranchCoverage) do
         let(:branch_type) { :else }
 
         context 'when there is a comment ignoring `else` branch coverage' do
-          let(:line_source) { "if rand(10) < 5 ? 'small' : 'big' \# :nocov-else:" }
+          let(:line_source) { "if rand(10) < 5 ? 'small' : 'big' # :nocov-else:" }
 
           it 'does not include the branch' do
             expect(uncovered_branches).not_to include(branch)
@@ -109,7 +109,7 @@ RSpec.describe(SimpleCov::Formatter::Terminal::BranchCoverage) do
         end
 
         context 'when there is a comment ignoring `when` branch coverage' do
-          let(:line_source) { "if rand(10) < 5 ? 'small' : 'big' \# :nocov-when:" }
+          let(:line_source) { "if rand(10) < 5 ? 'small' : 'big' # :nocov-when:" }
 
           it 'includes the branch' do
             expect(uncovered_branches).to include(branch)
