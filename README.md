@@ -21,8 +21,6 @@ Then execute:
 $ bundle install
 ```
 
-Then continue to the "Usage" section below.
-
 ## Usage
 
 Add something like the following to your `spec/spec_helper.rb` file:
