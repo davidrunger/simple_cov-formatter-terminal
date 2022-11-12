@@ -45,7 +45,9 @@ RSpec.describe(SimpleCov::Formatter::Terminal::FileDeterminer) do
 
       context 'when run in a non-gem project' do
         before do
-          expect(SimpleCov::Formatter::Terminal::GemAwareness).to receive(:gem?).and_return(false)
+          expect(SimpleCov::Formatter::Terminal::RailsAwareness).
+            to receive(:rails?).
+            and_return(true)
           allow(file_determiner).
             to receive(:spec_to_app_file_map).
             and_return(SimpleCov::Formatter::Terminal::SpecToAppMapping.default_spec_to_app_map)
