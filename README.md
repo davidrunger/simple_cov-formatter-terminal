@@ -6,12 +6,11 @@
 
 *Note:* This gem depends upon RSpec. If you aren't using RSpec to run your tests, it won't work!
 
-Add the gem to your application's `Gemfile`. Because the gem is not released via RubyGems, you will
-need to install it from GitHub.
+Add the gem to your application's `Gemfile`.
 
 ```rb
 group :test do
-  gem 'simple_cov-formatter-terminal', github: 'davidrunger/simple_cov-formatter-terminal'
+  gem 'simple_cov-formatter-terminal'
 end
 ```
 
