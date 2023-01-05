@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-ruby '3.1.3'
+ruby '3.2.0'
 
 source 'https://rubygems.org'
 
@@ -24,4 +24,8 @@ group :test do
   gem 'codecov', require: false
   gem 'rspec', require: false
   gem 'simplecov', require: false
+end
+
+group :development do
+  gem 'release_assistant', require: false, git: 'https://github.com/davidrunger/release_assistant'
 end
