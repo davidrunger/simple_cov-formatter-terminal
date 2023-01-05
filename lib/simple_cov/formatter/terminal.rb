@@ -4,8 +4,8 @@ class SimpleCov::Formatter::Terminal ; end # rubocop:disable Lint/EmptyClass
 
 require_relative 'terminal/config'
 require_relative 'terminal/file_determiner'
-require_relative 'terminal/result_printer'
 require_relative 'terminal/r_spec_integration'
+require_relative 'terminal/result_printer'
 require_relative 'terminal/version'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/filters'

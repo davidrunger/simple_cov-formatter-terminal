@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = 'Print detailed code coverage info to the terminal'
   spec.homepage = 'https://github.com/davidrunger/simplecov-formatter-terminal'
   spec.license = 'MIT'
-  spec.required_ruby_version = '>= 3.1.1'
+  spec.required_ruby_version = '>= 3.2.0'
 
   spec.metadata['allowed_push_host'] = 'https://davidrunger.com/'
 
