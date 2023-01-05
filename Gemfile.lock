@@ -18,7 +18,7 @@ GIT
 PATH
   remote: .
   specs:
-    simple_cov-formatter-terminal (0.1.2)
+    simple_cov-formatter-terminal (0.1.3.alpha)
       activesupport (>= 7.0.4, < 8)
       memoist (>= 0.16.2, < 1)
       rouge (>= 4.0.0, < 5)
