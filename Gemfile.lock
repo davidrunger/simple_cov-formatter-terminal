@@ -59,6 +59,7 @@ GEM
       byebug (~> 11.0)
       pry (>= 0.13, < 0.15)
     rainbow (3.1.1)
+    rake (13.0.6)
     regexp_parser (2.6.1)
     rexml (3.2.5)
     rouge (4.0.0)
@@ -113,6 +114,7 @@ DEPENDENCIES
   codecov
   pry
   pry-byebug
+  rake
   release_assistant!
   rspec
   rubocop
