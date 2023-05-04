@@ -5,6 +5,6 @@ module SimpleCov::Formatter; end
 
 # rubocop:disable Style/StaticClass
 class SimpleCov::Formatter::Terminal
-  VERSION = '0.2.2'
+  VERSION = '0.2.3.alpha'
 end
 # rubocop:enable Style/StaticClass
