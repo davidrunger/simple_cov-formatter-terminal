@@ -28,5 +28,5 @@ end
 
 group :development do
   gem 'rake', require: false
-  gem 'release_assistant', require: false, git: 'https://github.com/davidrunger/release_assistant'
+  gem 'runger_release_assistant', require: false
 end
