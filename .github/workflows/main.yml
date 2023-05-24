@@ -19,3 +19,7 @@ jobs:
           bundler-cache: true
       - run: bin/rubocop
       - run: bin/rspec
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: tmp/simple_cov

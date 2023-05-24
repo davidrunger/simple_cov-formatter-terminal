@@ -21,9 +21,9 @@ end
 
 group :test do
   gem 'climate_control', require: false
-  gem 'codecov', require: false
   gem 'rspec', require: false
   gem 'simplecov', require: false
+  gem 'simplecov-cobertura', require: false
 end
 
 group :development do
