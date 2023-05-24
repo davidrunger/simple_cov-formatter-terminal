@@ -7,8 +7,9 @@ SimpleCov.start do
 end
 require 'simple_cov/formatter/terminal'
 if ENV.fetch('CI', nil) == 'true'
-  require 'codecov'
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+  require 'simplecov-cobertura'
+  SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
+  SimpleCov.coverage_dir('tmp/simple_cov') # must match codecov-action directory option
 elsif RSpec.configuration.files_to_run.one?
   SimpleCov.formatter = SimpleCov::Formatter::Terminal
 end
