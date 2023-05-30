@@ -7,7 +7,7 @@ require_relative './target_file_writer'
 
 class SimpleCov::Formatter::Terminal::ResultPrinter
   extend Forwardable
-  extend Memoist
+  prepend MemoWise
   include SimpleCov::Formatter::Terminal::BranchCoverage
   include SimpleCov::Formatter::Terminal::ColorPrinting
 
@@ -99,7 +99,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
     SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred?
   end
 
-  memoize \
+  memo_wise \
   def target_file_writer
     SimpleCov::Formatter::Terminal::TargetFileWriter.new(targeted_application_file)
   end
@@ -120,7 +120,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
     end
   end
 
-  memoize \
+  memo_wise \
   def line_printer
     SimpleCov::Formatter::Terminal::LinePrinter.new(targeted_application_file)
   end

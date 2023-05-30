@@ -16,7 +16,7 @@ require 'simplecov'
 
 class SimpleCov::Formatter::Terminal
   extend Forwardable
-  extend Memoist
+  prepend MemoWise
 
   def_delegators(
     :file_determiner,
@@ -33,9 +33,9 @@ class SimpleCov::Formatter::Terminal
   )
 
   class << self
-    extend Memoist
+    prepend MemoWise
 
-    memoize \
+    memo_wise \
     def config
       Config.new
     end
@@ -55,12 +55,12 @@ class SimpleCov::Formatter::Terminal
 
   private
 
-  memoize \
+  memo_wise \
   def file_determiner
     SimpleCov::Formatter::Terminal::FileDeterminer.new
   end
 
-  memoize \
+  memo_wise \
   def result_printer
     SimpleCov::Formatter::Terminal::ResultPrinter.new(file_determiner)
   end

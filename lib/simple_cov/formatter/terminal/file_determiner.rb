@@ -3,9 +3,9 @@
 require 'memoist'
 
 class SimpleCov::Formatter::Terminal::FileDeterminer
-  extend Memoist
+  prepend MemoWise
 
-  memoize \
+  memo_wise \
   def executed_spec_file
     if executed_spec_files.size == 1
       executed_spec_files.first
@@ -17,7 +17,7 @@ class SimpleCov::Formatter::Terminal::FileDeterminer
     end
   end
 
-  memoize \
+  memo_wise \
   def targeted_application_file
     env_variable_file = ENV.fetch('SIMPLECOV_TARGET_FILE', nil)
     if !env_variable_file.nil?
@@ -35,18 +35,18 @@ class SimpleCov::Formatter::Terminal::FileDeterminer
     raise("Could not map executed spec file #{executed_spec_file} to application file!")
   end
 
-  memoize \
+  memo_wise \
   def executed_spec_files
     SimpleCov::Formatter::Terminal::RSpecIntegration.executed_spec_files
   end
 
-  memoize \
+  memo_wise \
   def spec_to_app_file_map
     SimpleCov::Formatter::Terminal.config.spec_to_app_file_map ||
     SimpleCov::Formatter::Terminal::SpecToAppMapping.default_spec_to_app_map
   end
 
-  memoize \
+  memo_wise \
   def unmappable_spec_regexes
     SimpleCov::Formatter::Terminal.config.unmappable_spec_regexes
   end

@@ -35,6 +35,6 @@ RSpec.configure do |config|
   config.order = :random
 
   config.before(:each) do
-    SimpleCov::Formatter::Terminal.config.flush_cache
+    SimpleCov::Formatter::Terminal.config.reset_memo_wise
   end
 end
