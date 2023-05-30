@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 require_relative './spec_to_app_mapping'
-require 'memoist'
+require 'memo_wise'
 
 class SimpleCov::Formatter::Terminal::Config
-  extend Memoist
+  prepend MemoWise
   include SimpleCov::Formatter::Terminal::SpecToAppMapping
 
   attr_accessor :spec_to_app_file_map, :unmappable_spec_regexes
@@ -16,7 +16,7 @@ class SimpleCov::Formatter::Terminal::Config
       SimpleCov::Formatter::Terminal::SpecToAppMapping::DEFAULT_UNMAPPABLE_SPEC_REGEXES
   end
 
-  memoize \
+  memo_wise \
   def write_target_info_file?
     ENV.fetch('SIMPLECOV_WRITE_TARGET_TO_FILE', nil) == '1'
   end

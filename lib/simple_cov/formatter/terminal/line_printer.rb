@@ -3,7 +3,7 @@
 require 'memoist'
 
 class SimpleCov::Formatter::Terminal::LinePrinter
-  extend Memoist
+  prepend MemoWise
   include SimpleCov::Formatter::Terminal::BranchCoverage
   include SimpleCov::Formatter::Terminal::ColorPrinting
 
@@ -59,7 +59,7 @@ class SimpleCov::Formatter::Terminal::LinePrinter
   end
   # rubocop:enable Style/StringConcatenation
 
-  memoize \
+  memo_wise \
   def syntax_highlighted_source_lines
     source = File.read(@targeted_application_file)
     formatter = Rouge::Formatters::Terminal256.new(Rouge::Themes::Base16.mode(:dark).new)

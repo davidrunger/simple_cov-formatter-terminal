@@ -3,11 +3,11 @@
 require 'memoist'
 
 module SimpleCov::Formatter::Terminal::BranchCoverage
-  extend Memoist
+  prepend MemoWise
 
   private
 
-  memoize \
+  memo_wise \
   def uncovered_branches(sourcefile)
     sourcefile.branches.
       reject(&:covered?).
