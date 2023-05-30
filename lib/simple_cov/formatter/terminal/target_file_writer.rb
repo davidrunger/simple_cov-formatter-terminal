@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'memoist'
+require 'memo_wise'
 
 class SimpleCov::Formatter::Terminal::TargetFileWriter
   def initialize(targeted_application_file)
