@@ -1,5 +1,6 @@
 ## Unreleased
-[no unreleased changes yet]
+### Fixed
+- Removed dangling memoist requires
 
 ## v0.2.3 (2023-05-30)
 ### Changed
