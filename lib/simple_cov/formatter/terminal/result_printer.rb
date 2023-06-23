@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative './branch_coverage'
-require_relative './color_printing'
-require_relative './line_printer'
-require_relative './target_file_writer'
+require_relative 'branch_coverage'
+require_relative 'color_printing'
+require_relative 'line_printer'
+require_relative 'target_file_writer'
 
 class SimpleCov::Formatter::Terminal::ResultPrinter
   extend Forwardable
