@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative './rails_awareness'
+require_relative 'rails_awareness'
 
 module SimpleCov::Formatter::Terminal::SpecToAppMapping
   # rubocop:disable Lint/OrAssignmentToConstant

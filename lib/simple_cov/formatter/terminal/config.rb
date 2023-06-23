@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative './spec_to_app_mapping'
+require_relative 'spec_to_app_mapping'
 require 'memo_wise'
 
 class SimpleCov::Formatter::Terminal::Config
