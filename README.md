@@ -37,6 +37,16 @@ SimpleCov.start
 spec file (e.g. `bin/rspec spec/models/user_spec.rb`) and not when multiple specs are executed (e.g.
 when simply running `bin/rspec` without any argument).
 
+## Which lines to print
+
+By default, only uncovered lines will be printed.
+
+If you would like to print all lines, add this to your `spec_helper.rb` file:
+
+```rb
+SimpleCov::Formatter::Terminal.config.lines_to_print = :all
+```
+
 ### Modifying the `spec_to_app_file_map`
 
 `SimpleCov::Formatter::Terminal` has a default hash that is used to map spec files to their

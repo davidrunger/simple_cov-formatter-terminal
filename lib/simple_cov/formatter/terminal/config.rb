@@ -3,18 +3,22 @@
 require_relative 'spec_to_app_mapping'
 require 'memo_wise'
 
-class SimpleCov::Formatter::Terminal::Config
+class SimpleCov::Formatter::Terminal::Config < Anyway::Config
   prepend MemoWise
   include SimpleCov::Formatter::Terminal::SpecToAppMapping
 
-  attr_accessor :spec_to_app_file_map, :unmappable_spec_regexes
-
-  def initialize
-    @spec_to_app_file_map =
-      SimpleCov::Formatter::Terminal::SpecToAppMapping.default_spec_to_app_map
-    @unmappable_spec_regexes =
-      SimpleCov::Formatter::Terminal::SpecToAppMapping::DEFAULT_UNMAPPABLE_SPEC_REGEXES
+  module LinesToPrint
+    ALL = :all
+    UNCOVERED = :uncovered
   end
+
+  attr_config(
+    lines_to_print: LinesToPrint::UNCOVERED,
+    spec_to_app_file_map:
+      SimpleCov::Formatter::Terminal::SpecToAppMapping.default_spec_to_app_map,
+    unmappable_spec_regexes:
+      SimpleCov::Formatter::Terminal::SpecToAppMapping::DEFAULT_UNMAPPABLE_SPEC_REGEXES,
+  )
 
   memo_wise \
   def write_target_info_file?
