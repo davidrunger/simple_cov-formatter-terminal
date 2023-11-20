@@ -30,7 +30,7 @@ class SimpleCov::Formatter::Terminal::LinePrinter
   end
 
   # rubocop:disable Style/StringConcatenation
-  def numbered_line_output(line_number, color, source_code = "", missed_branch_info = nil)
+  def numbered_line_output(line_number, color, source_code = '', missed_branch_info = nil)
     colored_space =
       case color
       when :red_on_yellow, :white_on_red then color(' ', color)

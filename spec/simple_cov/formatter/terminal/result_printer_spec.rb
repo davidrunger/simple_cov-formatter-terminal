@@ -163,8 +163,8 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
   end
 
-  describe "#line_numbers_to_print" do
-    context "when line_numbers_to_print config is :all" do
+  describe '#line_numbers_to_print' do
+    context 'when line_numbers_to_print config is :all' do
       around do |example|
         original_lines_to_print = SimpleCov::Formatter::Terminal.config.lines_to_print
         SimpleCov::Formatter::Terminal.config.lines_to_print = :all
@@ -178,7 +178,7 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
         result_printer.instance_variable_set(:@sourcefile, sourcefile)
       end
 
-      it "returns a Set that includes every line number in the file" do
+      it 'returns a Set that includes every line number in the file' do
         expect(result_printer.send(:line_numbers_to_print)).to eq(Set[1])
       end
     end
