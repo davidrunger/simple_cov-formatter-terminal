@@ -4,10 +4,10 @@ class SimpleCov::Formatter::Terminal ; end # rubocop:disable Lint/EmptyClass
 
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/filters'
-require 'anyway_config'
 require 'memo_wise'
 require 'rouge'
 require 'rspec/core'
+require 'runger_config'
 require 'simplecov'
 
 require_relative 'terminal/config'
