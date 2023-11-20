@@ -3,7 +3,7 @@
 require_relative 'spec_to_app_mapping'
 require 'memo_wise'
 
-class SimpleCov::Formatter::Terminal::Config < Anyway::Config
+class SimpleCov::Formatter::Terminal::Config < Runger::Config
   prepend MemoWise
   include SimpleCov::Formatter::Terminal::SpecToAppMapping
 
