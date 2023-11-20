@@ -1,3 +1,6 @@
+## Unreleased
+[no unreleased changes yet]
+
 ## v0.3.0 (2023-11-19)
 
 - Print only uncovered lines by default
