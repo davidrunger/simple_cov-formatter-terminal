@@ -97,7 +97,7 @@ GEM
       rubocop-factory_bot (~> 2.22)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    runger_config (3.0.1)
+    runger_config (4.0.0)
       activesupport (>= 7.1.2)
     runger_release_assistant (0.5.0)
       activesupport (>= 6, < 8)

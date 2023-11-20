@@ -1,5 +1,6 @@
 ## Unreleased
-[no unreleased changes yet]
+### Dependencies
+- Bump runger_config from 3.0.1 to 4.0.0
 
 ## v0.3.0 (2023-11-19)
 
