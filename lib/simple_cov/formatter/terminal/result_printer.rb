@@ -48,14 +48,32 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
   end
 
   def print_coverage_details(sourcefile)
+    @sourcefile = sourcefile
+
     if SimpleCov::Formatter::Terminal.config.write_target_info_file?
       target_file_writer.write_target_info_file
     end
 
     puts("---- Coverage for #{targeted_application_file} ".ljust(80, '-').rstrip)
+
+    skipped_lines = []
     sourcefile.lines.each do |line|
-      puts(line_printer.colored_line(line, sourcefile))
+      if print_line?(line.line_number)
+        if skipped_lines.any?
+          print_skipped_lines(skipped_lines)
+        end
+
+        puts(line_printer.colored_line(line, sourcefile))
+        skipped_lines = []
+      else
+        skipped_lines << line.line_number
+      end
     end
+
+    if skipped_lines.any?
+      print_skipped_lines(skipped_lines)
+    end
+
     puts(<<~LOG.squish)
       ----
       Line coverage: #{colorized_coverage(sourcefile.covered_percent)}
@@ -63,6 +81,20 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
       Uncovered branches: #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)}
       ----
     LOG
+  end
+
+  def print_skipped_lines(skipped_lines)
+    divider = ' -' * 40
+
+    puts(line_printer.numbered_line_output(nil, :white, divider))
+    puts(
+      line_printer.numbered_line_output(
+        nil,
+        :white,
+        "#{skipped_lines.size} covered line(s) omitted".center(80, ' '),
+      ),
+    )
+    puts(line_printer.numbered_line_output(nil, :white, divider))
   end
 
   def print_no_coverage_info_found
@@ -119,6 +151,52 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
     else color(num_uncovered_branches.to_s, :red)
     end
   end
+
+  def print_line?(line_number)
+    line_numbers_to_print.include?(line_number)
+  end
+
+  def sourcefile
+    @sourcefile ||= @result.files.find { _1.filename.end_with?(targeted_application_file) }
+  end
+
+  # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  memo_wise \
+  def line_numbers_to_print
+    max_line_number = sourcefile.lines.map(&:line_number).max
+
+    begin
+      case SimpleCov::Formatter::Terminal.config.lines_to_print.to_sym
+      in SimpleCov::Formatter::Terminal::Config::LinesToPrint::ALL
+        (1..max_line_number).to_a
+      in SimpleCov::Formatter::Terminal::Config::LinesToPrint::UNCOVERED
+        line_numbers_to_print = []
+
+        sourcefile.lines.each do |line|
+          if (
+            line.coverage.nil? || (
+              (line.coverage > 0) &&
+                !line_numbers_with_missing_branches(sourcefile).include?(line.line_number)
+            )
+          )
+            next
+          end
+
+          line_number = line.line_number
+          contextualized_line_numbers =
+            ((line_number - 2)..(line_number + 2)).
+              to_a.
+              select do |context_line_number|
+                context_line_number.positive? && context_line_number <= max_line_number
+              end
+          line_numbers_to_print += contextualized_line_numbers
+        end
+
+        line_numbers_to_print
+      end
+    end.to_set
+  end
+  # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   memo_wise \
   def line_printer

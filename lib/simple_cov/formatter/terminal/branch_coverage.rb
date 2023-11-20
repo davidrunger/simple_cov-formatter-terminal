@@ -25,4 +25,12 @@ module SimpleCov::Formatter::Terminal::BranchCoverage
       join(', ').
       presence
   end
+
+  memo_wise \
+  def line_numbers_with_missing_branches(sourcefile)
+    uncovered_branches(sourcefile).
+      map(&:start_line).
+      uniq.
+      sort
+  end
 end

@@ -9,7 +9,10 @@ RSpec.describe SimpleCov::Formatter::Terminal do
     end
   end
 
-  before { allow(File).to receive(:write) } # don't actually write to file
+  before do
+    # Don't actually write to file.
+    allow(File).to receive(:write)
+  end
 
   describe '::_setup_rspec' do
     subject(:_setup_rspec) do

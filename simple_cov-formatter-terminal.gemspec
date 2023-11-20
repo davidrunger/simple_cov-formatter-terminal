@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency('memo_wise', '>= 1.7.0', '< 2')
   spec.add_dependency('rouge', '>= 4.0.0', '< 5')
   spec.add_dependency('rspec-core', '>= 3.11.0', '< 4')
+  spec.add_dependency('runger_config', '>= 3.0.0')
   spec.add_dependency('simplecov', '>= 0.21.2', '< 1')
 
   # For more information and examples about making a new gem, check out our

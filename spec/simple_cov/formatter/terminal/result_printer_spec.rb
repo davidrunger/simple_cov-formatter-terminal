@@ -6,48 +6,48 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
   end
 
   let(:file_determiner) { SimpleCov::Formatter::Terminal::FileDeterminer.new }
+  let(:sourcefile) do
+    instance_double(
+      SimpleCov::SourceFile,
+      covered_percent: 80.5,
+      filename: targeted_application_file,
+      lines: [
+        instance_double(
+          SimpleCov::SourceFile::Line,
+          line_number: 1,
+          skipped?: false,
+          src: "puts(rand(10) < 5 ? 'hello world' : 'goodbye world')\n",
+          coverage: 1,
+        ),
+      ],
+      branches: [
+        instance_double(
+          SimpleCov::SourceFile::Branch,
+          coverage: 0,
+          end_line: 1,
+          inline?: true,
+          skipped?: false,
+          covered?: false,
+          start_line: 1,
+          type: :else,
+        ),
+        instance_double(
+          SimpleCov::SourceFile::Branch,
+          coverage: 0,
+          end_line: 1,
+          inline?: true,
+          skipped?: false,
+          covered?: false,
+          start_line: 1,
+          type: :when,
+        ),
+      ],
+    )
+  end
+  let(:targeted_application_file) { 'a_nifty_file.rb' }
 
   describe '#print_coverage_details' do
     subject(:print_coverage_details) { result_printer.print_coverage_details(sourcefile) }
-
-    let(:sourcefile) do
-      instance_double(
-        SimpleCov::SourceFile,
-        covered_percent: 80.5,
-        lines: [
-          instance_double(
-            SimpleCov::SourceFile::Line,
-            line_number: 1,
-            skipped?: false,
-            src: "puts(rand(10) < 5 ? 'hello world' : 'goodbye world')\n",
-            coverage: 1,
-          ),
-        ],
-        branches: [
-          instance_double(
-            SimpleCov::SourceFile::Branch,
-            coverage: 0,
-            end_line: 1,
-            inline?: true,
-            skipped?: false,
-            covered?: false,
-            start_line: 1,
-            type: :else,
-          ),
-          instance_double(
-            SimpleCov::SourceFile::Branch,
-            coverage: 0,
-            end_line: 1,
-            inline?: true,
-            skipped?: false,
-            covered?: false,
-            start_line: 1,
-            type: :when,
-          ),
-        ],
-      )
-    end
-    let(:targeted_application_file) { 'a_nifty_file.rb' }
 
     before do
       expect(SimpleCov::Formatter::Terminal.config).
@@ -159,6 +159,27 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
 
       it 'prints the number of uncovered branches in red' do
         expect(colorized_uncovered_branches).to eq("\e[0;31m#{num_uncovered_branches}\e[0m")
+      end
+    end
+  end
+
+  describe '#line_numbers_to_print' do
+    context 'when line_numbers_to_print config is :all' do
+      around do |example|
+        original_lines_to_print = SimpleCov::Formatter::Terminal.config.lines_to_print
+        SimpleCov::Formatter::Terminal.config.lines_to_print = :all
+
+        example.run
+
+        SimpleCov::Formatter::Terminal.config.lines_to_print = original_lines_to_print
+      end
+
+      before do
+        result_printer.instance_variable_set(:@sourcefile, sourcefile)
+      end
+
+      it 'returns a Set that includes every line number in the file' do
+        expect(result_printer.send(:line_numbers_to_print)).to eq(Set[1])
       end
     end
   end

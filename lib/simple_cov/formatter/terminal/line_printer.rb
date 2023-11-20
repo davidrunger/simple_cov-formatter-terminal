@@ -7,7 +7,7 @@ class SimpleCov::Formatter::Terminal::LinePrinter
   include SimpleCov::Formatter::Terminal::BranchCoverage
   include SimpleCov::Formatter::Terminal::ColorPrinting
 
-  def initialize(targeted_application_file)
+  def initialize(targeted_application_file = nil)
     @targeted_application_file = targeted_application_file
   end
 
@@ -30,18 +30,27 @@ class SimpleCov::Formatter::Terminal::LinePrinter
   end
 
   # rubocop:disable Style/StringConcatenation
-  def numbered_line_output(line_number, color, source_code, missed_branch_info = nil)
+  def numbered_line_output(line_number, color, source_code = '', missed_branch_info = nil)
     colored_space =
       case color
       when :red_on_yellow, :white_on_red then color(' ', color)
       else color(' ', :white_on_green)
       end
 
-    line_number_string =
+    line_number_width =
       if SimpleCov::Formatter::Terminal.config.write_target_info_file?
-        ":::#{line_number}".rjust(6, ' ')
+        6
       else
-        line_number.to_s.rjust(3, ' ')
+        3
+      end
+
+    line_number_string =
+      if line_number.blank?
+        ' ' * line_number_width
+      elsif SimpleCov::Formatter::Terminal.config.write_target_info_file?
+        ":::#{line_number}".rjust(line_number_width, ' ')
+      else
+        line_number.to_s.rjust(line_number_width, ' ')
       end
 
     output =

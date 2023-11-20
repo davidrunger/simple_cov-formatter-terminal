@@ -1,5 +1,6 @@
 ## Unreleased
-[no unreleased changes yet]
+
+- Print only uncovered lines by default
 
 ## v0.2.4 (2023-05-30)
 ### Fixed
