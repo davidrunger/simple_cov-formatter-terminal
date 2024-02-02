@@ -1,4 +1,4 @@
-## Unreleased
+## v1.1.0 (2024-02-02)
 - Source Ruby version from `.ruby-version` file
 
 ## v1.0.0 (2023-12-30)
