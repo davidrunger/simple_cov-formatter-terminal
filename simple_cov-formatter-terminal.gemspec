@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = 'Print detailed code coverage info to the terminal'
   spec.homepage = 'https://github.com/davidrunger/simple_cov-formatter-terminal'
   spec.license = 'MIT'
-  spec.required_ruby_version = Gem::Requirement.new(">= #{File.read('.ruby-version').rstrip}")
+  spec.required_ruby_version = ">= #{File.read('.ruby-version').rstrip}"
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = 'https://github.com/davidrunger/simple_cov-formatter-terminal'
