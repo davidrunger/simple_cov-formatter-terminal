@@ -32,7 +32,7 @@ class SimpleCov::Formatter::Terminal::FileDeterminer
         executed_spec_file.sub(spec_file_regex, app_file_substitution)
       end
     end.first&.sub(/_spec\.rb\z/, '.rb') ||
-    raise("Could not map executed spec file #{executed_spec_file} to application file!")
+      raise("Could not map executed spec file #{executed_spec_file} to application file!")
   end
 
   memo_wise \
@@ -43,7 +43,7 @@ class SimpleCov::Formatter::Terminal::FileDeterminer
   memo_wise \
   def spec_to_app_file_map
     SimpleCov::Formatter::Terminal.config.spec_to_app_file_map ||
-    SimpleCov::Formatter::Terminal::SpecToAppMapping.default_spec_to_app_map
+      SimpleCov::Formatter::Terminal::SpecToAppMapping.default_spec_to_app_map
   end
 
   memo_wise \
