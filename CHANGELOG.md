@@ -1,5 +1,5 @@
 ## Unreleased
-[no unreleased changes yet]
+- Rename primary branch from `master` to `main`
 
 ## v1.1.0 (2024-02-02)
 - Source Ruby version from `.ruby-version` file
