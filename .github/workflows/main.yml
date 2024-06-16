@@ -19,6 +19,7 @@ jobs:
       - run: bin/rubocop
       - run: bin/rspec
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           directory: tmp/simple_cov
+          token: ${{ secrets.CODECOV_TOKEN }}
