@@ -49,8 +49,8 @@ RSpec.describe(SimpleCov::Formatter::Terminal::LinePrinter) do
 
       it 'returns the syntax-highlighted source code with line number in white padded in green' do
         expect(colored_line).to eq(
-          "\e[1;39;102m \e[0m\e[0;37;49m  1\e[0m\e[1;39;102m \e[0m \e[38;5;239m" \
-          "#{line_source_code}\e[39m\e[38;5;252m\e[39m",
+          "\e[1;39;102m \e[0m\e[0;37;49m  1\e[0m\e[1;39;102m \e[0m \e[38;5;240m" \
+          "#{line_source_code}\e[39m\e[38;5;188m\e[39m",
         )
       end
     end
