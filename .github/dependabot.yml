@@ -1,5 +1,4 @@
-# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-
+---
 version: 2
 updates:
   - package-ecosystem: bundler
@@ -8,3 +7,5 @@ updates:
       interval: daily
       time: "04:04"
       timezone: America/Chicago
+    allow:
+      - dependency-type: all
