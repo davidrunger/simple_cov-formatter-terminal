@@ -74,6 +74,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
       before do
         expect(formatter.send(:file_determiner)).
           to receive(:executed_spec_files).
+          at_least(:once).
           and_return(['cool_spec.rb'])
       end
 
@@ -84,7 +85,7 @@ RSpec.describe SimpleCov::Formatter::Terminal do
             and_return(nil)
         end
 
-        it 'prints the appropriate info' do
+        it 'prints info about an undetermined application target' do
           expect(result_printer).to receive(:print_info_for_undetermined_application_target)
           format
         end

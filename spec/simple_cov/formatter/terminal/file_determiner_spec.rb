@@ -72,9 +72,8 @@ RSpec.describe(SimpleCov::Formatter::Terminal::FileDeterminer) do
         context 'when the executed spec file is not matched by any regex' do
           let(:executed_spec_file) { 'spec/dont_know/how_to/map_this_spec.rb' }
 
-          it 'raises an error' do
-            expect { targeted_application_file }.
-              to raise_error(/Could not map executed spec file .* to application file!/)
+          it 'returns nil' do
+            expect(targeted_application_file).to eq(nil)
           end
         end
       end

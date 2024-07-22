@@ -108,13 +108,24 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
     puts('Not showing test coverage details because no specs were executed successfully.')
   end
 
-  def print_info_for_undetermined_application_target
+  def print_info_for_undeterminable_application_target
     puts(<<~LOG.squish)
       Not showing test coverage details because "#{executed_spec_file}" cannot
       be mapped to a single application file.
     LOG
     puts(<<~LOG.squish)
       Tip: you can specify a file manually via a SIMPLECOV_TARGET_FILE environment variable.
+    LOG
+  end
+
+  def print_info_for_undetermined_application_target
+    puts(<<~LOG.squish)
+      Not showing test coverage details because we could not map "#{executed_spec_file}"
+      to an application file.
+    LOG
+    puts(<<~LOG.squish)
+      Tip: You can provide a mapping via
+      `SimpleCov::Formatter::Terminal.config.spec_to_app_file_map`.
     LOG
   end
 

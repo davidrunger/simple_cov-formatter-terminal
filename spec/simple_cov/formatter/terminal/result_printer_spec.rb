@@ -88,9 +88,9 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
   end
 
-  describe '#print_info_for_undetermined_application_target' do
-    subject(:print_info_for_undetermined_application_target) do
-      result_printer.send(:print_info_for_undetermined_application_target)
+  describe '#print_info_for_undeterminable_application_target' do
+    subject(:print_info_for_undeterminable_application_target) do
+      result_printer.send(:print_info_for_undeterminable_application_target)
     end
 
     before do
@@ -101,7 +101,7 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
       expect(result_printer).to receive(:puts).with(/Not showing test coverage details/)
       expect(result_printer).to receive(:puts).with(/Tip: you can specify a file manually/)
 
-      print_info_for_undetermined_application_target
+      print_info_for_undeterminable_application_target
     end
   end
 
