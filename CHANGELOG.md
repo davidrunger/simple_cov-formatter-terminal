@@ -1,4 +1,4 @@
-## Unreleased
+## v1.4.0 (2024-07-21)
 - Handle map-spec-file-to-app failure more elegantly (#229)
 
 ## v1.3.0 (2024-06-28)
