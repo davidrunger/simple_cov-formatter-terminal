@@ -105,6 +105,25 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
   end
 
+  describe '#print_info_for_undetermined_application_target' do
+    subject(:print_info_for_undetermined_application_target) do
+      result_printer.send(:print_info_for_undetermined_application_target)
+    end
+
+    before do
+      expect(file_determiner).to receive(:executed_spec_file).and_return('nifty_spec.rb')
+    end
+
+    it 'prints the expected messages' do
+      expect(result_printer).to receive(:puts).
+        with(/\ANot showing test coverage details because we could not map/)
+      expect(result_printer).to receive(:puts).
+        with(/\ATip: You can provide a mapping/)
+
+      print_info_for_undetermined_application_target
+    end
+  end
+
   describe '#colorized_coverage' do
     subject(:colorized_coverage) { result_printer.send(:colorized_coverage, covered_percent) }
 

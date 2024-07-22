@@ -78,8 +78,25 @@ RSpec.describe SimpleCov::Formatter::Terminal do
           and_return(['cool_spec.rb'])
       end
 
-      context 'when a targeted application file cannot be determined' do
+      context 'when a targeted application file cannot possibly be determined' do
         before do
+          expect(formatter.send(:file_determiner)).
+            to receive(:unmappable_spec_file?).
+            and_return(true)
+        end
+
+        it 'prints info about an undeterminable application target' do
+          expect(result_printer).to receive(:print_info_for_undeterminable_application_target)
+          format
+        end
+      end
+
+      context 'when a targeted application file was not determined (but maybe could be)' do
+        before do
+          expect(formatter.send(:file_determiner)).
+            to receive(:unmappable_spec_file?).
+            and_return(false)
+
           expect(formatter.send(:file_determiner)).
             to receive(:targeted_application_file).
             and_return(nil)
