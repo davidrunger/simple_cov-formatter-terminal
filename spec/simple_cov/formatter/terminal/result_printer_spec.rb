@@ -88,6 +88,23 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
   end
 
+  describe '#print_info_for_undeterminable_application_target' do
+    subject(:print_info_for_undeterminable_application_target) do
+      result_printer.send(:print_info_for_undeterminable_application_target)
+    end
+
+    before do
+      expect(file_determiner).to receive(:executed_spec_file).and_return('nifty_spec.rb')
+    end
+
+    it 'prints the expected messages' do
+      expect(result_printer).to receive(:puts).with(/Not showing test coverage details/)
+      expect(result_printer).to receive(:puts).with(/Tip: you can specify a file manually/)
+
+      print_info_for_undeterminable_application_target
+    end
+  end
+
   describe '#print_info_for_undetermined_application_target' do
     subject(:print_info_for_undetermined_application_target) do
       result_printer.send(:print_info_for_undetermined_application_target)
@@ -98,8 +115,10 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
 
     it 'prints the expected messages' do
-      expect(result_printer).to receive(:puts).with(/Not showing test coverage details/)
-      expect(result_printer).to receive(:puts).with(/Tip: you can specify a file manually/)
+      expect(result_printer).to receive(:puts).
+        with(/\ANot showing test coverage details because we could not map/)
+      expect(result_printer).to receive(:puts).
+        with(/\ATip: You can provide a mapping/)
 
       print_info_for_undetermined_application_target
     end

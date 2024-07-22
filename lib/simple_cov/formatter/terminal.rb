@@ -25,12 +25,14 @@ class SimpleCov::Formatter::Terminal
     :executed_spec_file,
     :executed_spec_files,
     :targeted_application_file,
+    :unmappable_spec_file?,
   )
   def_delegators(
     :result_printer,
     :print_coverage_info,
     :print_info_for_no_executed_specs,
     :print_info_for_nonexistent_application_target,
+    :print_info_for_undeterminable_application_target,
     :print_info_for_undetermined_application_target,
   )
 
@@ -46,6 +48,8 @@ class SimpleCov::Formatter::Terminal
   def format(result)
     if executed_spec_files.nil?
       print_info_for_no_executed_specs
+    elsif unmappable_spec_file?
+      print_info_for_undeterminable_application_target
     elsif targeted_application_file.nil?
       print_info_for_undetermined_application_target
     elsif File.exist?(targeted_application_file)

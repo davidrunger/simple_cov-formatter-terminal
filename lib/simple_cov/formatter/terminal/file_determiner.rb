@@ -25,14 +25,18 @@ class SimpleCov::Formatter::Terminal::FileDeterminer
       return env_variable_file
     end
 
-    return nil if unmappable_spec_regexes.any? { executed_spec_file.match?(_1) }
+    return nil if unmappable_spec_file?
 
     spec_to_app_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
       if executed_spec_file.match?(spec_file_regex)
         executed_spec_file.sub(spec_file_regex, app_file_substitution)
       end
-    end.first&.sub(/_spec\.rb\z/, '.rb') ||
-      raise("Could not map executed spec file #{executed_spec_file} to application file!")
+    end.first&.sub(/_spec\.rb\z/, '.rb')
+  end
+
+  memo_wise \
+  def unmappable_spec_file?
+    unmappable_spec_regexes.any? { executed_spec_file.match?(_1) }
   end
 
   memo_wise \
