@@ -121,7 +121,7 @@ RSpec.describe(SimpleCov::Formatter::Terminal::LinePrinter) do
 
         it 'prints a link (using the pattern) to the source line' do
           expect(colored_line).to include(
-            "\e]8;;vscode:#{ENV['PWD']}/app/file.rb:1\e\\  1\e]8;;\e\\",
+            "\e]8;;vscode:#{ENV.fetch('PWD')}/app/file.rb:1\e\\  1\e]8;;\e\\",
           )
         end
       end
