@@ -3,7 +3,6 @@
 require_relative 'branch_coverage'
 require_relative 'color_printing'
 require_relative 'line_printer'
-require_relative 'target_file_writer'
 
 class SimpleCov::Formatter::Terminal::ResultPrinter
   extend Forwardable
@@ -49,10 +48,6 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
 
   def print_coverage_details(sourcefile)
     @sourcefile = sourcefile
-
-    if SimpleCov::Formatter::Terminal.config.write_target_info_file?
-      target_file_writer.write_target_info_file
-    end
 
     puts("---- Coverage for #{targeted_application_file} ".ljust(80, '-').rstrip)
 
@@ -140,11 +135,6 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
 
   def failure_occurred?
     SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred?
-  end
-
-  memo_wise \
-  def target_file_writer
-    SimpleCov::Formatter::Terminal::TargetFileWriter.new(targeted_application_file)
   end
 
   def colorized_coverage(covered_percent)

@@ -7,6 +7,8 @@ class SimpleCov::Formatter::Terminal::LinePrinter
   include SimpleCov::Formatter::Terminal::BranchCoverage
   include SimpleCov::Formatter::Terminal::ColorPrinting
 
+  LINE_NUMBER_WIDTH = 3
+
   def initialize(targeted_application_file = nil)
     @targeted_application_file = targeted_application_file
   end
@@ -37,20 +39,16 @@ class SimpleCov::Formatter::Terminal::LinePrinter
       else color(' ', :white_on_green)
       end
 
-    line_number_width =
-      if SimpleCov::Formatter::Terminal.config.write_target_info_file?
-        6
-      else
-        3
-      end
+    pattern = SimpleCov::Formatter::Terminal.config.terminal_hyperlink_target_pattern
+
+    link_text = line_number.to_s.rjust(LINE_NUMBER_WIDTH, ' ')
 
     line_number_string =
-      if line_number.blank?
-        ' ' * line_number_width
-      elsif SimpleCov::Formatter::Terminal.config.write_target_info_file?
-        ":::#{line_number}".rjust(line_number_width, ' ')
+      if pattern
+        link_target = pattern.sub('%f', absolute_target_path).sub('%l', line_number.to_s)
+        "\e]8;;#{link_target}\e\\#{link_text}\e]8;;\e\\"
       else
-        line_number.to_s.rjust(line_number_width, ' ')
+        link_text
       end
 
     output =
@@ -75,5 +73,12 @@ class SimpleCov::Formatter::Terminal::LinePrinter
     lexer = Rouge::Lexers::Ruby.new
     highlighted_source = formatter.format(lexer.lex(source))
     highlighted_source.split("\n")
+  end
+
+  private
+
+  memo_wise \
+  def absolute_target_path
+    File.join(ENV.fetch('PWD'), @targeted_application_file)
   end
 end

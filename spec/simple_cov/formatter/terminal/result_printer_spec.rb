@@ -50,11 +50,6 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     subject(:print_coverage_details) { result_printer.print_coverage_details(sourcefile) }
 
     before do
-      expect(SimpleCov::Formatter::Terminal.config).
-        to receive(:write_target_info_file?).
-        at_least(:once).
-        and_return(false)
-
       expect(result_printer).
         to receive(:targeted_application_file).
         at_least(:once).

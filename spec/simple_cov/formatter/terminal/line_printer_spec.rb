@@ -31,7 +31,7 @@ RSpec.describe(SimpleCov::Formatter::Terminal::LinePrinter) do
     let(:skipped?) { false }
     let(:branches) { [] }
     let(:line_number) { 1 }
-    let(:write_target_info_file?) { false }
+    let(:terminal_hyperlink_target_pattern) { nil }
 
     before do
       expect(File).
@@ -40,8 +40,8 @@ RSpec.describe(SimpleCov::Formatter::Terminal::LinePrinter) do
         and_return("# frozen_string_literal\n")
 
       allow(SimpleCov::Formatter::Terminal.config).
-        to receive(:write_target_info_file?).
-        and_return(write_target_info_file?)
+        to receive(:terminal_hyperlink_target_pattern).
+        and_return(terminal_hyperlink_target_pattern)
     end
 
     context 'when the line is skipped' do
@@ -116,11 +116,13 @@ RSpec.describe(SimpleCov::Formatter::Terminal::LinePrinter) do
           to start_with("\e[1;37;41m \e[0m\e[1;37;41m  1\e[0m\e[1;37;41m \e[0m")
       end
 
-      context 'when write_target_info_file? is true' do
-        let(:write_target_info_file?) { true }
+      context 'when terminal_hyperlink_target_pattern is truthy' do
+        let(:terminal_hyperlink_target_pattern) { 'vscode:%f:%l' }
 
-        it 'prints the source line number preceded by 3 colons' do
-          expect(colored_line).to include(":::#{line_number}".rjust(6, ' '))
+        it 'prints a link (using the pattern) to the source line' do
+          expect(colored_line).to include(
+            "\e]8;;vscode:#{ENV.fetch('PWD')}/app/file.rb:1\e\\  1\e]8;;\e\\",
+          )
         end
       end
     end
