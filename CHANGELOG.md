@@ -1,3 +1,6 @@
+## Unreleased
+[no unreleased changes yet]
+
 ## v1.5.0 (2024-07-28)
 - Print line numbers as terminal hyperlinks if a `SimpleCov::Formatter::Terminal.config.terminal_hyperlink_target_pattern` is provided
 
