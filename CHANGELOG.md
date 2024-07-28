@@ -1,5 +1,5 @@
 ## Unreleased
-[no unreleased changes yet]
+- Print line numbers as terminal hyperlinks if a `SimpleCov::Formatter::Terminal.config.terminal_hyperlink_target_pattern` is provided
 
 ## v1.4.0 (2024-07-21)
 - Handle map-spec-file-to-app failure more elegantly (#229)

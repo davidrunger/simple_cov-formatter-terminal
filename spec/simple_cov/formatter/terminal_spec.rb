@@ -3,12 +3,6 @@
 RSpec.describe SimpleCov::Formatter::Terminal do
   subject(:formatter) { SimpleCov::Formatter::Terminal.new }
 
-  around do |example|
-    ClimateControl.modify(SIMPLECOV_WRITE_TARGET_TO_FILE: nil) do
-      example.run
-    end
-  end
-
   before do
     # Don't actually write to file.
     allow(File).to receive(:write)
@@ -247,20 +241,6 @@ RSpec.describe SimpleCov::Formatter::Terminal do
             it 'prints coverage details' do
               expect(result_printer).to receive(:print_coverage_details)
               format
-            end
-
-            context 'when the SIMPLECOV_WRITE_TARGET_TO_FILE env var is 1' do
-              around do |example|
-                ClimateControl.modify(SIMPLECOV_WRITE_TARGET_TO_FILE: '1') do
-                  example.run
-                end
-              end
-
-              it 'calls #write_target_info_file' do
-                expect(result_printer.send(:target_file_writer)).to receive(:write_target_info_file)
-                expect(result_printer).to receive(:puts).at_least(:once) # suppress output
-                format
-              end
             end
           end
         end
