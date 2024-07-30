@@ -1,5 +1,5 @@
 ## Unreleased
-[no unreleased changes yet]
+- Make terminal hyperlink pattern an ENV var (`SIMPLECOV_TERMINAL_HYPERLINK_PATTERN`) rather than a Ruby setting
 
 ## v1.5.0 (2024-07-28)
 - Print line numbers as terminal hyperlinks if a `SimpleCov::Formatter::Terminal.config.terminal_hyperlink_target_pattern` is provided

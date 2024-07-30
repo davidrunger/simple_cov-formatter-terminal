@@ -31,17 +31,19 @@ RSpec.describe(SimpleCov::Formatter::Terminal::LinePrinter) do
     let(:skipped?) { false }
     let(:branches) { [] }
     let(:line_number) { 1 }
-    let(:terminal_hyperlink_target_pattern) { nil }
+    let(:terminal_hyperlink_pattern) { nil }
 
     before do
       expect(File).
         to receive(:read).
         with('app/file.rb').
         and_return("# frozen_string_literal\n")
+    end
 
-      allow(SimpleCov::Formatter::Terminal.config).
-        to receive(:terminal_hyperlink_target_pattern).
-        and_return(terminal_hyperlink_target_pattern)
+    around do |spec|
+      ClimateControl.modify(SIMPLECOV_TERMINAL_HYPERLINK_PATTERN: terminal_hyperlink_pattern) do
+        spec.run
+      end
     end
 
     context 'when the line is skipped' do
@@ -116,8 +118,8 @@ RSpec.describe(SimpleCov::Formatter::Terminal::LinePrinter) do
           to start_with("\e[1;37;41m \e[0m\e[1;37;41m  1\e[0m\e[1;37;41m \e[0m")
       end
 
-      context 'when terminal_hyperlink_target_pattern is truthy' do
-        let(:terminal_hyperlink_target_pattern) { 'vscode:%f:%l' }
+      context 'when a terminal hyperlink pattern is set in an env var' do
+        let(:terminal_hyperlink_pattern) { 'vscode:%f:%l' }
 
         it 'prints a link (using the pattern) to the source line' do
           expect(colored_line).to include(
