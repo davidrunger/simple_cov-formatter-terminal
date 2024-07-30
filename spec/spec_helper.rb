@@ -12,7 +12,6 @@ if ENV.fetch('CI', nil) == 'true'
   SimpleCov.coverage_dir('tmp/simple_cov') # must match codecov-action directory option
 elsif RSpec.configuration.files_to_run.one?
   SimpleCov.formatter = SimpleCov::Formatter::Terminal
-  SimpleCov::Formatter::Terminal.config.terminal_hyperlink_target_pattern = 'vscode://file/%f:%l'
 end
 require 'climate_control'
 

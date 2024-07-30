@@ -117,17 +117,17 @@ branch is not covered on line 18).
 
 ## Terminal hyperlinks
 
-If you provide a `terminal_hyperlink_target_pattern`, then SimpleCov::Formatter::Terminal will attempt to print the line numbers in its display as hyperlinks to the relevant line of code.
+If you set a `SIMPLECOV_TERMINAL_HYPERLINK_PATTERN`, then SimpleCov::Formatter::Terminal will attempt to print the line numbers in its display as hyperlinks to the relevant line of code.
 
-The pattern can include these interpolation markers:
+The pattern can/should include these interpolation markers:
 
 - `%f` - This will be replaced with the absolute path of the application file.
 - `%l` - This will be replaced with the line number.
 
 For example, this pattern will work to make the line numbers clickable links that open the appropriate file at the appropriate line in VS Code:
 
-```rb
-SimpleCov::Formatter::Terminal.config.terminal_hyperlink_target_pattern = 'vscode://file/%f:%l'
+```sh
+SIMPLECOV_TERMINAL_HYPERLINK_PATTERN="vscode://file/%f:%l"
 ```
 
 ## Development

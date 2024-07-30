@@ -39,7 +39,7 @@ class SimpleCov::Formatter::Terminal::LinePrinter
       else color(' ', :white_on_green)
       end
 
-    pattern = SimpleCov::Formatter::Terminal.config.terminal_hyperlink_target_pattern
+    pattern = ENV['SIMPLECOV_TERMINAL_HYPERLINK_PATTERN'].presence
 
     link_text = line_number.to_s.rjust(LINE_NUMBER_WIDTH, ' ')
 
