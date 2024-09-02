@@ -32,7 +32,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
   end
 
   def print_coverage_summary(sourcefile, log_addendum = nil)
-    summary = +"-- Coverage for #{targeted_application_file} --\n"
+    summary = "-- Coverage for #{targeted_application_file} --\n"
     summary << "Line coverage: #{colorized_coverage(sourcefile.covered_percent)}"
     if SimpleCov.branch_coverage?
       summary << ' '
