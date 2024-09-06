@@ -104,6 +104,10 @@ SimpleCov::Formatter::Terminal.config.spec_to_app_file_map = {
 }
 ```
 
+### Manually specifying file for which to show coverage
+
+An alternative to using the `spec_to_app_file_map` configuration is to set a `SIMPLECOV_TARGET_FILE` environment variable.
+
 ## Branch coverage
 
 If you enable branch coverage for SimpleCov (via `enable_coverage(:branch)` within your
