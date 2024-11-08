@@ -1,5 +1,5 @@
 ## Unreleased
-[no unreleased changes yet]
+- Remove upper bounds on versions for all dependencies
 
 ## v1.6.0 (2024-07-30)
 - Make terminal hyperlink pattern an ENV var (`SIMPLECOV_TERMINAL_HYPERLINK_PATTERN`) rather than a Ruby setting
