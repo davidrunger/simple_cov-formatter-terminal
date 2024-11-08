@@ -2,12 +2,12 @@ PATH
   remote: .
   specs:
     simple_cov-formatter-terminal (1.6.1.alpha)
-      activesupport (>= 7.0.4, < 8)
-      memo_wise (>= 1.7.0, < 2)
-      rouge (>= 4.0.0, < 5)
-      rspec-core (>= 3.11.0, < 4)
+      activesupport (>= 7.0.4)
+      memo_wise (>= 1.7.0)
+      rouge (>= 4.0.0)
+      rspec-core (>= 3.11.0)
       runger_config (>= 3.0.0)
-      simplecov (>= 0.21.2, < 1)
+      simplecov (>= 0.21.2)
 
 GEM
   remote: https://rubygems.org/
