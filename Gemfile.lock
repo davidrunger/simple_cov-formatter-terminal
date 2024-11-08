@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    simple_cov-formatter-terminal (1.6.1.alpha)
+    simple_cov-formatter-terminal (1.7.0)
       activesupport (>= 7.0.4)
       memo_wise (>= 1.7.0)
       rouge (>= 4.0.0)
