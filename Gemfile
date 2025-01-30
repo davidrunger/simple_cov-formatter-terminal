@@ -20,7 +20,7 @@ group :development, :test do
 end
 
 group :test do
-  gem 'climate_control', require: false
+  gem 'climate_control'
   gem 'rspec', require: false
   gem 'simplecov', require: false
   gem 'simplecov-cobertura', require: false
