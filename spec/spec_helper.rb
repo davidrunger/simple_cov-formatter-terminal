@@ -13,7 +13,9 @@ if ENV.fetch('CI', nil) == 'true'
 elsif RSpec.configuration.files_to_run.one?
   SimpleCov.formatter = SimpleCov::Formatter::Terminal
 end
-require 'climate_control'
+
+require 'bundler/setup'
+Bundler.require(:default, 'test')
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
