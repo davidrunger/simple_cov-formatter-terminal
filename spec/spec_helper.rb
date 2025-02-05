@@ -5,7 +5,10 @@ SimpleCov.start do
   add_filter(%r{\A/spec/})
   enable_coverage(:branch)
 end
-require 'simple_cov/formatter/terminal'
+
+require 'bundler/setup'
+Bundler.require(:default, :test)
+
 if ENV.fetch('CI', nil) == 'true'
   require 'simplecov-cobertura'
   SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
@@ -13,9 +16,6 @@ if ENV.fetch('CI', nil) == 'true'
 elsif RSpec.configuration.files_to_run.one?
   SimpleCov.formatter = SimpleCov::Formatter::Terminal
 end
-
-require 'bundler/setup'
-Bundler.require(:default, :test)
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
