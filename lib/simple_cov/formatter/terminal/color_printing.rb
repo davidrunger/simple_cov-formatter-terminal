@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module SimpleCov::Formatter::Terminal::ColorPrinting
-  # rubocop:disable Metrics/CyclomaticComplexity
   def color(message, color)
     case color
     when :white then "\e[0;37;49m#{message}\e[0m"
@@ -14,5 +13,4 @@ module SimpleCov::Formatter::Terminal::ColorPrinting
     else raise("Unknown color format '#{color}'.")
     end
   end
-  # rubocop:enable Metrics/CyclomaticComplexity
 end
