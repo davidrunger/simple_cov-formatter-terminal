@@ -161,7 +161,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
     @sourcefile ||= @result.files.find { _1.filename.end_with?(targeted_application_file) }
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:disable Metrics/PerceivedComplexity
   memo_wise \
   def line_numbers_to_print
     max_line_number = sourcefile.lines.map(&:line_number).max
@@ -197,7 +197,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
       end
     end.to_set
   end
-  # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/PerceivedComplexity
 
   memo_wise \
   def line_printer
