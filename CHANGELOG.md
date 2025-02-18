@@ -1,5 +1,5 @@
 ## Unreleased
-[no unreleased changes yet]
+- Respect `SIMPLECOV_TARGET_FILE` env var for otherwise unmappable spec files.
 
 ## v1.7.0 (2024-11-08)
 - Remove upper bounds on versions for all dependencies
