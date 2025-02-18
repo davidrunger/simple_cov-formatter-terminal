@@ -1,3 +1,6 @@
+## Unreleased
+[no unreleased changes yet]
+
 ## v1.7.1 (2025-02-17)
 - Respect `SIMPLECOV_TARGET_FILE` env var for otherwise unmappable spec files.
 
