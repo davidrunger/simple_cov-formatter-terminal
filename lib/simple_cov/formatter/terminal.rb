@@ -48,7 +48,7 @@ class SimpleCov::Formatter::Terminal
   def format(result)
     if executed_spec_files.nil?
       print_info_for_no_executed_specs
-    elsif unmappable_spec_file?
+    elsif unmappable_spec_file? && targeted_application_file.nil?
       print_info_for_undeterminable_application_target
     elsif targeted_application_file.nil?
       print_info_for_undetermined_application_target

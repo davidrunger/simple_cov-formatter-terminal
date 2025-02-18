@@ -72,16 +72,38 @@ RSpec.describe SimpleCov::Formatter::Terminal do
           and_return(['cool_spec.rb'])
       end
 
-      context 'when a targeted application file cannot possibly be determined' do
+      context 'when a targeted application file cannot possibly be determined from the spec file alone' do
         before do
           expect(formatter.send(:file_determiner)).
             to receive(:unmappable_spec_file?).
+            at_least(:once).
             and_return(true)
         end
 
-        it 'prints info about an undeterminable application target' do
-          expect(result_printer).to receive(:print_info_for_undeterminable_application_target)
-          format
+        context 'when a SIMPLECOV_TARGET_FILE env var has been provided' do
+          around do |spec|
+            ClimateControl.modify(SIMPLECOV_TARGET_FILE: 'lib/simple_cov/formatter/terminal.rb') do
+              spec.run
+            end
+          end
+
+          it 'prints coverage info' do
+            expect(result_printer).to receive(:print_coverage_info)
+            format
+          end
+        end
+
+        context 'when a SIMPLECOV_TARGET_FILE env var has not been provided' do
+          around do |spec|
+            ClimateControl.modify(SIMPLECOV_TARGET_FILE: nil) do
+              spec.run
+            end
+          end
+
+          it 'prints info about an undeterminable application target' do
+            expect(result_printer).to receive(:print_info_for_undeterminable_application_target)
+            format
+          end
         end
       end
 
