@@ -51,153 +51,142 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
     let(:result) { instance_double(SimpleCov::Result) }
 
-    context 'when no specs have been successfully executed' do
-      before do
-        expect(formatter).
-          to receive(:executed_spec_files).
-          and_return(nil)
+    context 'when DISABLE_SIMPLECOV_TERMINAL env var is present' do
+      around do |spec|
+        ClimateControl.modify(DISABLE_SIMPLECOV_TERMINAL: '1') do
+          spec.run
+        end
       end
 
-      it 'prints a message about no specs having been executed' do
-        expect(result_printer).to receive(:puts).with(/no specs were executed successfully/)
+      it 'does not print anything' do
+        expect(result_printer).not_to receive(:puts)
+
         format
       end
     end
 
-    context 'when one spec file has been executed' do
-      before do
-        expect(formatter.send(:file_determiner)).
-          to receive(:executed_spec_files).
-          at_least(:once).
-          and_return(['cool_spec.rb'])
-      end
+    context 'when DISABLE_SIMPLECOV_TERMINAL env var is not present' do
+      before { expect(ENV).not_to have_key('DISABLE_SIMPLECOV_TERMINAL') }
 
-      context 'when a targeted application file cannot possibly be determined from the spec file alone' do
+      context 'when no specs have been successfully executed' do
         before do
-          expect(formatter.send(:file_determiner)).
-            to receive(:unmappable_spec_file?).
-            at_least(:once).
-            and_return(true)
-        end
-
-        context 'when a SIMPLECOV_TARGET_FILE env var has been provided' do
-          around do |spec|
-            ClimateControl.modify(SIMPLECOV_TARGET_FILE: 'lib/simple_cov/formatter/terminal.rb') do
-              spec.run
-            end
-          end
-
-          it 'prints coverage info' do
-            expect(result_printer).to receive(:print_coverage_info)
-            format
-          end
-        end
-
-        context 'when a SIMPLECOV_TARGET_FILE env var has not been provided' do
-          around do |spec|
-            ClimateControl.modify(SIMPLECOV_TARGET_FILE: nil) do
-              spec.run
-            end
-          end
-
-          it 'prints info about an undeterminable application target' do
-            expect(result_printer).to receive(:print_info_for_undeterminable_application_target)
-            format
-          end
-        end
-      end
-
-      context 'when a targeted application file was not determined (but maybe could be)' do
-        before do
-          expect(formatter.send(:file_determiner)).
-            to receive(:unmappable_spec_file?).
-            and_return(false)
-
-          expect(formatter.send(:file_determiner)).
-            to receive(:targeted_application_file).
+          expect(formatter).
+            to receive(:executed_spec_files).
             and_return(nil)
         end
 
-        it 'prints info about an undetermined application target' do
-          expect(result_printer).to receive(:print_info_for_undetermined_application_target)
+        it 'prints a message about no specs having been executed' do
+          expect(result_printer).to receive(:puts).with(/no specs were executed successfully/)
           format
         end
       end
 
-      context 'when the "targeted application file" does not actually exist' do
-        before do
-          expect(formatter).
-            to receive(:targeted_application_file).
-            at_least(:once).
-            and_return('not/there.rb')
-        end
-
-        it 'prints the appropriate info' do
-          expect(formatter).to receive(:print_info_for_nonexistent_application_target)
-          format
-        end
-      end
-
-      context 'when the targeted application file exists' do
+      context 'when one spec file has been executed' do
         before do
           expect(formatter.send(:file_determiner)).
-            to receive(:targeted_application_file).
+            to receive(:executed_spec_files).
             at_least(:once).
-            and_return(targeted_application_file)
-
-          expect(result).to receive(:files).and_return(files)
+            and_return(['cool_spec.rb'])
         end
 
-        let(:targeted_application_file) { 'lib/simple_cov/formatter/terminal.rb' }
-        let(:files) { [SimpleCov::SourceFile.new(targeted_application_file, coverage_data)] }
-        let(:coverage_data) do
-          { 'lines' => [] }
+        context 'when a targeted application file cannot possibly be determined from the spec file alone' do
+          before do
+            expect(formatter.send(:file_determiner)).
+              to receive(:unmappable_spec_file?).
+              at_least(:once).
+              and_return(true)
+          end
+
+          context 'when a SIMPLECOV_TARGET_FILE env var has been provided' do
+            around do |spec|
+              ClimateControl.modify(SIMPLECOV_TARGET_FILE: 'lib/simple_cov/formatter/terminal.rb') do
+                spec.run
+              end
+            end
+
+            it 'prints coverage info' do
+              expect(result_printer).to receive(:print_coverage_info)
+              format
+            end
+          end
+
+          context 'when a SIMPLECOV_TARGET_FILE env var has not been provided' do
+            around do |spec|
+              ClimateControl.modify(SIMPLECOV_TARGET_FILE: nil) do
+                spec.run
+              end
+            end
+
+            it 'prints info about an undeterminable application target' do
+              expect(result_printer).to receive(:print_info_for_undeterminable_application_target)
+              format
+            end
+          end
         end
 
-        context 'when there is no coverage info about the targeted file' do
-          let(:files) { [SimpleCov::SourceFile.new('app/not/the/target/file.rb', coverage_data)] }
+        context 'when a targeted application file was not determined (but maybe could be)' do
+          before do
+            expect(formatter.send(:file_determiner)).
+              to receive(:unmappable_spec_file?).
+              and_return(false)
 
-          it 'prints that no coverage info was found' do
-            expect(result_printer).to receive(:puts).with(/No code coverage info was found/)
+            expect(formatter.send(:file_determiner)).
+              to receive(:targeted_application_file).
+              and_return(nil)
+          end
+
+          it 'prints info about an undetermined application target' do
+            expect(result_printer).to receive(:print_info_for_undetermined_application_target)
             format
           end
         end
 
-        context 'when a test failure failure occurred' do
-          around do |spec|
-            SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred = true
-            spec.run
-            SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred = false
+        context 'when the "targeted application file" does not actually exist' do
+          before do
+            expect(formatter).
+              to receive(:targeted_application_file).
+              at_least(:once).
+              and_return('not/there.rb')
           end
 
-          context 'when SIMPLECOV_FORCE_DETAILS env var is not set' do
-            around do |example|
-              ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: nil) do
-                example.run
-              end
-            end
-
-            it 'does not print coverage details' do
-              expect(result_printer).not_to receive(:print_coverage_details)
-              expect(result_printer).to receive(:puts) # suppress actual output
-              format
-            end
-
-            it 'says why it is not printing coverage details' do
-              expect(result_printer).
-                to receive(:puts).
-                with(/Not showing detailed coverage because .+/)
-              format
-            end
+          it 'prints the appropriate info' do
+            expect(formatter).to receive(:print_info_for_nonexistent_application_target)
+            format
           end
         end
 
-        context 'when a test failure has not occurred' do
+        context 'when the targeted application file exists' do
           before do
-            expect(SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred).to eq(false)
+            expect(formatter.send(:file_determiner)).
+              to receive(:targeted_application_file).
+              at_least(:once).
+              and_return(targeted_application_file)
+
+            expect(result).to receive(:files).and_return(files)
           end
 
-          context 'when test coverage is 100%' do
+          let(:targeted_application_file) { 'lib/simple_cov/formatter/terminal.rb' }
+          let(:files) { [SimpleCov::SourceFile.new(targeted_application_file, coverage_data)] }
+          let(:coverage_data) do
+            { 'lines' => [] }
+          end
+
+          context 'when there is no coverage info about the targeted file' do
+            let(:files) { [SimpleCov::SourceFile.new('app/not/the/target/file.rb', coverage_data)] }
+
+            it 'prints that no coverage info was found' do
+              expect(result_printer).to receive(:puts).with(/No code coverage info was found/)
+              format
+            end
+          end
+
+          context 'when a test failure failure occurred' do
+            around do |spec|
+              SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred = true
+              spec.run
+              SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred = false
+            end
+
             context 'when SIMPLECOV_FORCE_DETAILS env var is not set' do
               around do |example|
                 ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: nil) do
@@ -207,62 +196,91 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
               it 'does not print coverage details' do
                 expect(result_printer).not_to receive(:print_coverage_details)
-                expect(result_printer).to receive(:print_coverage_summary)
+                expect(result_printer).to receive(:puts) # suppress actual output
                 format
               end
 
-              context 'when branch coverage is enabled' do
-                before { expect(SimpleCov).to receive(:branch_coverage?).and_return(true) }
+              it 'says why it is not printing coverage details' do
+                expect(result_printer).
+                  to receive(:puts).
+                  with(/Not showing detailed coverage because .+/)
+                format
+              end
+            end
+          end
 
-                it 'includes info about the branch coverage' do
-                  expect(result_printer).
-                    to receive(:puts).
-                    at_least(:once).
-                    with(/Uncovered branches: \e\[1;32;49m0\e\[0m/)
+          context 'when a test failure has not occurred' do
+            before do
+              expect(SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred).to eq(false)
+            end
 
+            context 'when test coverage is 100%' do
+              context 'when SIMPLECOV_FORCE_DETAILS env var is not set' do
+                around do |example|
+                  ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: nil) do
+                    example.run
+                  end
+                end
+
+                it 'does not print coverage details' do
+                  expect(result_printer).not_to receive(:print_coverage_details)
+                  expect(result_printer).to receive(:print_coverage_summary)
                   format
+                end
+
+                context 'when branch coverage is enabled' do
+                  before { expect(SimpleCov).to receive(:branch_coverage?).and_return(true) }
+
+                  it 'includes info about the branch coverage' do
+                    expect(result_printer).
+                      to receive(:puts).
+                      at_least(:once).
+                      with(/Uncovered branches: \e\[1;32;49m0\e\[0m/)
+
+                    format
+                  end
+                end
+
+                context 'when branch coverage is not enabled' do
+                  before { expect(SimpleCov).to receive(:branch_coverage?).and_return(false) }
+
+                  it 'does not include info about branch coverage' do
+                    expect(result_printer).
+                      not_to receive(:puts).
+                      with(/branches/)
+
+                    expect(result_printer).
+                      to receive(:puts).
+                      with(/Line coverage:/)
+
+                    format
+                  end
                 end
               end
 
-              context 'when branch coverage is not enabled' do
-                before { expect(SimpleCov).to receive(:branch_coverage?).and_return(false) }
+              context 'when SIMPLECOV_FORCE_DETAILS env var is set to 1' do
+                around do |example|
+                  ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: '1') do
+                    example.run
+                  end
+                end
 
-                it 'does not include info about branch coverage' do
-                  expect(result_printer).
-                    not_to receive(:puts).
-                    with(/branches/)
-
-                  expect(result_printer).
-                    to receive(:puts).
-                    with(/Line coverage:/)
-
+                it 'prints coverage details' do
+                  expect(result_printer).to receive(:print_coverage_details)
                   format
                 end
               end
             end
 
-            context 'when SIMPLECOV_FORCE_DETAILS env var is set to 1' do
-              around do |example|
-                ClimateControl.modify(SIMPLECOV_FORCE_DETAILS: '1') do
-                  example.run
-                end
+            context 'when test coverage is less than 100%' do
+              let(:coverage_data) do
+                { 'lines' => [nil, nil, 1, 2, 0, 1] }
               end
 
               it 'prints coverage details' do
                 expect(result_printer).to receive(:print_coverage_details)
                 format
               end
-            end
-          end
-
-          context 'when test coverage is less than 100%' do
-            let(:coverage_data) do
-              { 'lines' => [nil, nil, 1, 2, 0, 1] }
-            end
-
-            it 'prints coverage details' do
-              expect(result_printer).to receive(:print_coverage_details)
-              format
             end
           end
         end
