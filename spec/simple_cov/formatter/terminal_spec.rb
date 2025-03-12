@@ -99,7 +99,9 @@ RSpec.describe SimpleCov::Formatter::Terminal do
 
           context 'when a SIMPLECOV_TARGET_FILE env var has been provided' do
             around do |spec|
-              ClimateControl.modify(SIMPLECOV_TARGET_FILE: 'lib/simple_cov/formatter/terminal.rb') do
+              ClimateControl.modify(
+                SIMPLECOV_TARGET_FILE: 'lib/simple_cov/formatter/terminal.rb',
+              ) do
                 spec.run
               end
             end
