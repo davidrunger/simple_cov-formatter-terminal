@@ -134,6 +134,10 @@ For example, this pattern will work to make the line numbers clickable links tha
 SIMPLECOV_TERMINAL_HYPERLINK_PATTERN="vscode://file/%f:%l"
 ```
 
+## Suppressing
+
+You can disable SimpleCov::Formatter::Terminal by setting a `DISABLE_SIMPLECOV_TERMINAL` environment variable to any value.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/rspec` to run
