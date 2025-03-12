@@ -1,6 +1,9 @@
 ## Unreleased
 - Support disabling via `DISABLE_SIMPLECOV_TERMINAL` environment variable.
 
+### Docs
+- Add table of contents to README.
+
 ## v1.7.1 (2025-02-17)
 - Respect `SIMPLECOV_TARGET_FILE` env var for otherwise unmappable spec files.
 

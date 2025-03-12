@@ -2,6 +2,26 @@
 
 ![image](https://user-images.githubusercontent.com/8197963/195740768-e2cbb99d-7cf2-42bf-a178-2f78eb653dd3.png)
 
+<!--ts-->
+* [SimpleCov::Formatter::Terminal](#simplecovformatterterminal)
+   * [Installation](#installation)
+   * [Usage](#usage)
+   * [Which lines to print](#which-lines-to-print)
+      * [Modifying the spec_to_app_file_map](#modifying-the-spec_to_app_file_map)
+      * [Manually specifying file for which to show coverage](#manually-specifying-file-for-which-to-show-coverage)
+   * [Branch coverage](#branch-coverage)
+   * [Terminal hyperlinks](#terminal-hyperlinks)
+   * [Disabling](#disabling)
+      * [Via env var](#via-env-var)
+   * [Development](#development)
+   * [Contributing](#contributing)
+   * [License](#license)
+
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
+<!-- Added by: david, at: Wed Mar 12 02:48:00 PM CDT 2025 -->
+
+<!--te-->
+
 ## Installation
 
 *Note:* This gem depends upon RSpec. If you aren't using RSpec to run your tests, it won't work!
