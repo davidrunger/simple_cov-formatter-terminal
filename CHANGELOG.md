@@ -1,4 +1,4 @@
-## Unreleased
+## v1.8.0 (2025-03-12)
 - Support disabling via `DISABLE_SIMPLECOV_TERMINAL` environment variable.
 
 ### Docs
