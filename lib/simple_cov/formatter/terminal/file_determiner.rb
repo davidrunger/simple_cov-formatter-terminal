@@ -36,7 +36,7 @@ class SimpleCov::Formatter::Terminal::FileDeterminer
 
   memo_wise \
   def unmappable_spec_file?
-    unmappable_spec_regexes.any? { executed_spec_file.match?(_1) }
+    unmappable_spec_regexes.any? { executed_spec_file.match?(it) }
   end
 
   memo_wise \
