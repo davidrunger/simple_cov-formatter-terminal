@@ -20,8 +20,8 @@ module SimpleCov::Formatter::Terminal::BranchCoverage
 
   def missed_branch_info(line, sourcefile)
     uncovered_branches(sourcefile).
-      select { _1.start_line == line.line_number }.
-      map { _1.type.to_s }.
+      select { it.start_line == line.line_number }.
+      map { it.type.to_s }.
       join(', ').
       presence
   end

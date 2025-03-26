@@ -17,7 +17,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
   end
 
   def print_coverage_info(result)
-    sourcefile = result.files.find { _1.filename.end_with?(targeted_application_file) }
+    sourcefile = result.files.find { it.filename.end_with?(targeted_application_file) }
     force_coverage = ENV.fetch('SIMPLECOV_FORCE_DETAILS', nil) == '1'
 
     if sourcefile.nil?
@@ -158,7 +158,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
   end
 
   def sourcefile
-    @sourcefile ||= @result.files.find { _1.filename.end_with?(targeted_application_file) }
+    @sourcefile ||= @result.files.find { it.filename.end_with?(targeted_application_file) }
   end
 
   memo_wise \

@@ -32,7 +32,7 @@ module SimpleCov::Formatter::Terminal::RSpecIntegration
           SimpleCov::Formatter::Terminal::RSpecIntegration.failure_occurred =
             examples.any?(&:exception)
           SimpleCov::Formatter::Terminal::RSpecIntegration.executed_spec_files =
-            examples.map { _1.file_path.delete_prefix('./') }.uniq
+            examples.map { it.file_path.delete_prefix('./') }.uniq
         end
       end
     end
