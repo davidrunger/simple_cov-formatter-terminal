@@ -230,7 +230,8 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
 
           it 'returns a Set that includes the numbers in the specified ranges' do
             expect(line_numbers_to_print).to eq(Set.new(
-              (line_range_1_start..line_range_1_end).to_a + (line_range_2_start..line_range_2_end).to_a,
+              (line_range_1_start..line_range_1_end).to_a +
+                (line_range_2_start..line_range_2_end).to_a,
             ))
           end
         end
