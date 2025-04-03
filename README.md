@@ -128,6 +128,10 @@ SimpleCov::Formatter::Terminal.config.spec_to_app_file_map = {
 
 An alternative to using the `spec_to_app_file_map` configuration is to set a `SIMPLECOV_TARGET_FILE` environment variable.
 
+### Manually specifying the lines for which to show coverage
+
+To show coverage only for certain lines, you can specify a range (or ranges) via a `SIMPLECOV_TERMINAL_LINES` environment variable, e.g. `SIMPLECOV_TERMINAL_LINES=169-172` or `SIMPLECOV_TERMINAL_LINES=172,180-192`.
+
 ## Branch coverage
 
 If you enable branch coverage for SimpleCov (via `enable_coverage(:branch)` within your

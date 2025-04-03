@@ -1,5 +1,5 @@
 ## Unreleased
-[no unreleased changes yet]
+- Support specifying a range (or ranges) of lines for which to show coverage via a `SIMPLECOV_TERMINAL_LINES` environment variable.
 
 ## v1.8.0 (2025-03-12)
 - Support disabling via `DISABLE_SIMPLECOV_TERMINAL` environment variable.
