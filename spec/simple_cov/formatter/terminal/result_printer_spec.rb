@@ -298,7 +298,7 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
                 skipped?: false,
                 src: "# This is a comment.\n",
                 coverage: nil,
-              )
+              ),
             ]
           end
 
