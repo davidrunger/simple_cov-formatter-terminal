@@ -1,4 +1,7 @@
 ## Unreleased
+[no unreleased changes yet]
+
+## v1.9.0 (2025-04-03)
 - Support specifying a range (or ranges) of lines for which to show coverage via a `SIMPLECOV_TERMINAL_LINES` environment variable.
 
 ## v1.8.0 (2025-03-12)
