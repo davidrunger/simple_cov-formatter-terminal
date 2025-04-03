@@ -9,6 +9,7 @@
    * [Which lines to print](#which-lines-to-print)
       * [Modifying the spec_to_app_file_map](#modifying-the-spec_to_app_file_map)
       * [Manually specifying file for which to show coverage](#manually-specifying-file-for-which-to-show-coverage)
+      * [Manually specifying the lines for which to show coverage](#manually-specifying-the-lines-for-which-to-show-coverage)
    * [Branch coverage](#branch-coverage)
    * [Terminal hyperlinks](#terminal-hyperlinks)
    * [Disabling](#disabling)
@@ -18,7 +19,7 @@
    * [License](#license)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: david, at: Wed Mar 12 02:48:00 PM CDT 2025 -->
+<!-- Added by: david, at: Thu Apr  3 06:28:33 PM CDT 2025 -->
 
 <!--te-->
 
