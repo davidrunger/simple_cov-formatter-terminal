@@ -278,6 +278,35 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
           expect(line_numbers_to_print).to eq(Set[1])
         end
       end
+
+      context 'when line_numbers_to_print config is :uncovered' do
+        around do |example|
+          original_lines_to_print = SimpleCov::Formatter::Terminal.config.lines_to_print
+          SimpleCov::Formatter::Terminal.config.lines_to_print = :uncovered
+
+          example.run
+
+          SimpleCov::Formatter::Terminal.config.lines_to_print = original_lines_to_print
+        end
+
+        context 'when coverage for all of the lines is nil' do
+          let(:lines) do
+            [
+              instance_double(
+                SimpleCov::SourceFile::Line,
+                line_number: 1,
+                skipped?: false,
+                src: "# This is a comment.\n",
+                coverage: nil,
+              )
+            ]
+          end
+
+          it 'returns an empty Set' do
+            expect(line_numbers_to_print).to eq(Set.new)
+          end
+        end
+      end
     end
   end
 
