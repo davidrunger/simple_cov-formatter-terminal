@@ -174,7 +174,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
       if (env_var_line_ranges = ENV.fetch('SIMPLECOV_TERMINAL_LINES', nil)).present?
         env_var_line_ranges.split(',').reduce([]) do |total_lines, env_var_line_range|
           lines_start, lines_end = env_var_line_range.split('-').map { Integer(it) }
-          total_lines + (lines_start..lines_end).to_a
+          total_lines + (lines_start..(lines_end || lines_start)).to_a
         end
       else
         case SimpleCov::Formatter::Terminal.config.lines_to_print.to_sym

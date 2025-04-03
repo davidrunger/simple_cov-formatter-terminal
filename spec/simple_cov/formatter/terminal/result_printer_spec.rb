@@ -64,9 +64,17 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
         and_return("# frozen_string_literal\n")
     end
 
-    it 'prints stuff' do
-      expect(result_printer).to receive(:puts).at_least(:once)
-      print_coverage_details
+    context 'when a SIMPLECOV_TERMINAL_LINES env var is not present' do
+      around do |spec|
+        ClimateControl.modify(SIMPLECOV_TERMINAL_LINES: nil) do
+          spec.run
+        end
+      end
+
+      it 'prints stuff' do
+        expect(result_printer).to receive(:puts).at_least(:once)
+        print_coverage_details
+      end
     end
   end
 
@@ -207,6 +215,17 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
           end
         end
 
+        context 'when the env var is multiple single line numbers' do
+          let(:simplecov_terminal_lines_env_var) { "#{line_number_1},#{line_number_2}" }
+
+          let(:line_number_1) { 1 }
+          let(:line_number_2) { 6 }
+
+          it 'returns a Set that includes the specified line numbers' do
+            expect(line_numbers_to_print).to eq(Set[line_number_1, line_number_2])
+          end
+        end
+
         context 'when the env var is a single line range' do
           let(:simplecov_terminal_lines_env_var) { "#{line_range_start}-#{line_range_end}" }
 
@@ -239,7 +258,11 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
 
     context 'when a SIMPLECOV_TERMINAL_LINES env var is not present' do
-      before { expect(ENV.fetch('SIMPLECOV_TERMINAL_LINES', nil)).to be_blank }
+      around do |spec|
+        ClimateControl.modify(SIMPLECOV_TERMINAL_LINES: nil) do
+          spec.run
+        end
+      end
 
       context 'when line_numbers_to_print config is :all' do
         around do |example|
@@ -254,6 +277,47 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
         it 'returns a Set that includes every line number in the file' do
           expect(line_numbers_to_print).to eq(Set[1])
         end
+      end
+    end
+  end
+
+  describe '#print_skipped_lines' do
+    subject(:print_skipped_lines) { result_printer.send(:print_skipped_lines, [1]) }
+
+    before do
+      allow(result_printer).to receive(:puts)
+      allow(result_printer).
+        to receive(:line_printer).
+        and_return(
+          SimpleCov::Formatter::Terminal::LinePrinter.new(''),
+        )
+    end
+
+    context 'when a SIMPLECOV_TERMINAL_LINES env var is present' do
+      around do |spec|
+        ClimateControl.modify(SIMPLECOV_TERMINAL_LINES: '1-1') do
+          spec.run
+        end
+      end
+
+      it 'does not mention omitting covered lines' do
+        print_skipped_lines
+
+        expect(result_printer).not_to have_received(:puts).with(/covered/)
+      end
+    end
+
+    context 'when a SIMPLECOV_TERMINAL_LINES env var is not present' do
+      around do |spec|
+        ClimateControl.modify(SIMPLECOV_TERMINAL_LINES: nil) do
+          spec.run
+        end
+      end
+
+      it 'mentions omitting covered lines' do
+        print_skipped_lines
+
+        expect(result_printer).to have_received(:puts).with(/covered/)
       end
     end
   end
