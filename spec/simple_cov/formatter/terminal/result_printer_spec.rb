@@ -11,15 +11,7 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
       SimpleCov::SourceFile,
       covered_percent: 80.5,
       filename: targeted_application_file,
-      lines: [
-        instance_double(
-          SimpleCov::SourceFile::Line,
-          line_number: 1,
-          skipped?: false,
-          src: "puts(rand(10) < 5 ? 'hello world' : 'goodbye world')\n",
-          coverage: 1,
-        ),
-      ],
+      lines:,
       branches: [
         instance_double(
           SimpleCov::SourceFile::Branch,
@@ -43,6 +35,17 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
         ),
       ],
     )
+  end
+  let(:lines) do
+    [
+      instance_double(
+        SimpleCov::SourceFile::Line,
+        line_number: 1,
+        skipped?: false,
+        src: "puts(rand(10) < 5 ? 'hello world' : 'goodbye world')\n",
+        coverage: 1,
+      ),
+    ]
   end
   let(:targeted_application_file) { 'a_nifty_file.rb' }
 
@@ -178,22 +181,78 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
   end
 
   describe '#line_numbers_to_print' do
-    context 'when line_numbers_to_print config is :all' do
-      around do |example|
-        original_lines_to_print = SimpleCov::Formatter::Terminal.config.lines_to_print
-        SimpleCov::Formatter::Terminal.config.lines_to_print = :all
+    subject(:line_numbers_to_print) { result_printer.send(:line_numbers_to_print) }
 
-        example.run
+    before do
+      result_printer.instance_variable_set(:@sourcefile, sourcefile)
+    end
 
-        SimpleCov::Formatter::Terminal.config.lines_to_print = original_lines_to_print
+    context 'when a SIMPLECOV_TERMINAL_LINES env var is present' do
+      around do |spec|
+        ClimateControl.modify(SIMPLECOV_TERMINAL_LINES: simplecov_terminal_lines_env_var) do
+          spec.run
+        end
       end
 
-      before do
-        result_printer.instance_variable_set(:@sourcefile, sourcefile)
-      end
+      context 'when the source file has a greater or equal number of lines as the max line specified in the range(s)' do
+        let(:lines) do
+          (1..6).map do |line_number|
+            instance_double(
+              SimpleCov::SourceFile::Line,
+              line_number:,
+              skipped?: false,
+              src: "puts('Line #{line_number}.')\n",
+              coverage: 1,
+            )
+          end
+        end
 
-      it 'returns a Set that includes every line number in the file' do
-        expect(result_printer.send(:line_numbers_to_print)).to eq(Set[1])
+        context 'when the env var is a single line range' do
+          let(:simplecov_terminal_lines_env_var) { "#{line_range_start}-#{line_range_end}" }
+
+          let(:line_range_start) { 2 }
+          let(:line_range_end) { 5 }
+
+          it 'returns a Set that includes the numbers in the specified range' do
+            expect(line_numbers_to_print).to eq(Set.new((line_range_start..line_range_end)))
+          end
+        end
+
+        context 'when the env var is multiple line ranges' do
+          let(:simplecov_terminal_lines_env_var) do
+            "#{line_range_1_start}-#{line_range_1_end},#{line_range_2_start}-#{line_range_2_end}"
+          end
+
+          let(:line_range_1_start) { 1 }
+          let(:line_range_1_end) { 2 }
+          let(:line_range_2_start) { 5 }
+          let(:line_range_2_end) { 6 }
+
+          it 'returns a Set that includes the numbers in the specified ranges' do
+            expect(line_numbers_to_print).to eq(Set.new(
+              (line_range_1_start..line_range_1_end).to_a + (line_range_2_start..line_range_2_end).to_a,
+            ))
+          end
+        end
+      end
+    end
+
+    context 'when a SIMPLECOV_TERMINAL_LINES env var is not present' do
+      before { expect(ENV.fetch('SIMPLECOV_TERMINAL_LINES', nil)).to be_blank }
+
+      context 'when line_numbers_to_print config is :all' do
+        around do |example|
+          original_lines_to_print = SimpleCov::Formatter::Terminal.config.lines_to_print
+          SimpleCov::Formatter::Terminal.config.lines_to_print = :all
+
+          example.run
+
+          SimpleCov::Formatter::Terminal.config.lines_to_print = original_lines_to_print
+        end
+
+        it 'returns a Set that includes every line number in the file' do
+          expect(line_numbers_to_print).to eq(Set[1])
+        end
       end
     end
   end

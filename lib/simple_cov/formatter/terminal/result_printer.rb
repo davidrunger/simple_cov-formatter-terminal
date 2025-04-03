@@ -81,12 +81,17 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
   def print_skipped_lines(skipped_lines)
     divider = ' -' * 40
 
+    # If we are skipping lines because they aren't in an env var specified
+    # range, they might or might not be covered. If we are skipping them
+    # otherwise, it's because they're covered.
+    skipped_lines_adjective = ENV.fetch('SIMPLECOV_TERMINAL_LINES', nil).present? ? '' : 'covered '
+
     puts(line_printer.numbered_line_output(nil, :white, divider))
     puts(
       line_printer.numbered_line_output(
         nil,
         :white,
-        "#{skipped_lines.size} covered line(s) omitted".center(80, ' '),
+        "#{skipped_lines.size} #{skipped_lines_adjective}line(s) omitted".center(80, ' '),
       ),
     )
     puts(line_printer.numbered_line_output(nil, :white, divider))
@@ -166,33 +171,40 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
     max_line_number = sourcefile.lines.map(&:line_number).max
 
     begin
-      case SimpleCov::Formatter::Terminal.config.lines_to_print.to_sym
-      in SimpleCov::Formatter::Terminal::Config::LinesToPrint::ALL
-        (1..max_line_number).to_a
-      in SimpleCov::Formatter::Terminal::Config::LinesToPrint::UNCOVERED
-        line_numbers_to_print = []
+      if (env_var_line_ranges = ENV.fetch('SIMPLECOV_TERMINAL_LINES', nil)).present?
+        env_var_line_ranges.split(',').reduce([]) do |total_lines, env_var_line_range|
+          lines_start, lines_end = env_var_line_range.split('-').map { Integer(it) }
+          total_lines + (lines_start..lines_end).to_a
+        end
+      else
+        case SimpleCov::Formatter::Terminal.config.lines_to_print.to_sym
+        in SimpleCov::Formatter::Terminal::Config::LinesToPrint::ALL
+          (1..max_line_number).to_a
+        in SimpleCov::Formatter::Terminal::Config::LinesToPrint::UNCOVERED
+          line_numbers_to_print = []
 
-        sourcefile.lines.each do |line|
-          if (
-            line.coverage.nil? || (
-              (line.coverage > 0) &&
-                !line_numbers_with_missing_branches(sourcefile).include?(line.line_number)
+          sourcefile.lines.each do |line|
+            if (
+              line.coverage.nil? || (
+                (line.coverage > 0) &&
+                  !line_numbers_with_missing_branches(sourcefile).include?(line.line_number)
+              )
             )
-          )
-            next
+              next
+            end
+
+            line_number = line.line_number
+            contextualized_line_numbers =
+              ((line_number - 2)..(line_number + 2)).
+                to_a.
+                select do |context_line_number|
+                  context_line_number.positive? && context_line_number <= max_line_number
+                end
+            line_numbers_to_print += contextualized_line_numbers
           end
 
-          line_number = line.line_number
-          contextualized_line_numbers =
-            ((line_number - 2)..(line_number + 2)).
-              to_a.
-              select do |context_line_number|
-                context_line_number.positive? && context_line_number <= max_line_number
-              end
-          line_numbers_to_print += contextualized_line_numbers
+          line_numbers_to_print
         end
-
-        line_numbers_to_print
       end
     end.to_set
   end
