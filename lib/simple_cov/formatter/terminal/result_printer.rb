@@ -42,7 +42,9 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
     else
       summary << "\n"
     end
-    summary << log_addendum if log_addendum
+    if log_addendum
+      summary << log_addendum
+    end
     puts(summary)
   end
 

@@ -25,7 +25,9 @@ class SimpleCov::Formatter::Terminal::FileDeterminer
       return env_variable_file
     end
 
-    return nil if unmappable_spec_file?
+    if unmappable_spec_file?
+      return nil
+    end
 
     spec_to_app_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
       if executed_spec_file.match?(spec_file_regex)

@@ -8,6 +8,14 @@ RSpec.describe SimpleCov::Formatter::Terminal do
     allow(File).to receive(:write)
   end
 
+  describe '::setup_rspec' do
+    it 'does not set up RSpec again' do
+      expect(RSpec).not_to receive(:configure)
+
+      SimpleCov::Formatter::Terminal::RSpecIntegration.setup_rspec
+    end
+  end
+
   describe '::_setup_rspec' do
     subject(:_setup_rspec) do
       SimpleCov::Formatter::Terminal::RSpecIntegration.send(:_setup_rspec)
