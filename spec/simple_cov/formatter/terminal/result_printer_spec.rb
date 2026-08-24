@@ -76,6 +76,34 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
         print_coverage_details
       end
     end
+
+    context 'when lines are skipped before and after a printed line' do
+      let(:lines) do
+        (1..3).map do |line_number|
+          instance_double(
+            SimpleCov::SourceFile::Line,
+            line_number:,
+            skipped?: false,
+            src: "puts('Line #{line_number}.')\n",
+            coverage: 1,
+          )
+        end
+      end
+
+      around do |spec|
+        ClimateControl.modify(SIMPLECOV_TERMINAL_LINES: '2') do
+          spec.run
+        end
+      end
+
+      it 'prints the skipped line dividers around the displayed line' do
+        allow(result_printer).to receive(:puts)
+        expect(result_printer).to receive(:print_skipped_lines).with([1]).and_call_original
+        expect(result_printer).to receive(:print_skipped_lines).with([3]).and_call_original
+
+        print_coverage_details
+      end
+    end
   end
 
   describe '#print_info_for_nonexistent_application_target' do
@@ -305,6 +333,21 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
           it 'returns an empty Set' do
             expect(line_numbers_to_print).to eq(Set.new)
           end
+        end
+      end
+
+      context 'when line_numbers_to_print config is unsupported' do
+        around do |example|
+          original_lines_to_print = SimpleCov::Formatter::Terminal.config.lines_to_print
+          SimpleCov::Formatter::Terminal.config.lines_to_print = :unsupported
+
+          example.run
+
+          SimpleCov::Formatter::Terminal.config.lines_to_print = original_lines_to_print
+        end
+
+        it 'raises an error' do
+          expect { line_numbers_to_print }.to raise_error(NoMatchingPatternError)
         end
       end
     end
