@@ -5,16 +5,14 @@ module SimpleCov::Formatter::Terminal::RSpecIntegration
     attr_accessor :executed_spec_files, :failure_occurred
 
     def setup_rspec
-      if @rspec_is_set_up # :nocov-else:
-        return
+      if !@rspec_is_set_up
+        # We can't easily test this, since we use this library in its own RSpec tests,
+        # so we'd be setting it up twice if we tested it, which would be a bit of a problem.
+        # :nocov:
+        _setup_rspec
+        @rspec_is_set_up = true
+        # :nocov:
       end
-
-      # We can't easily test this, since we use this library in its own RSpec tests,
-      # so we'd be setting it up twice if we tested it, which would be a bit of a problem.
-      # :nocov:
-      _setup_rspec
-      @rspec_is_set_up = true
-      # :nocov:
     end
 
     def failure_occurred?

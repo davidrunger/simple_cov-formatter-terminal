@@ -22,18 +22,16 @@ class SimpleCov::Formatter::Terminal::FileDeterminer
     env_variable_file = ENV.fetch('SIMPLECOV_TARGET_FILE', nil)
     if !env_variable_file.nil?
       puts('Determined targeted application file from SIMPLECOV_TARGET_FILE environment variable!!')
-      return env_variable_file
+      env_variable_file
+    elsif unmappable_spec_file?
+      nil
+    else
+      spec_to_app_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
+        if executed_spec_file.match?(spec_file_regex)
+          executed_spec_file.sub(spec_file_regex, app_file_substitution)
+        end
+      end.first&.sub(/_spec\.rb\z/, '.rb')
     end
-
-    if unmappable_spec_file?
-      return nil
-    end
-
-    spec_to_app_file_map.lazy.filter_map do |spec_file_regex, app_file_substitution|
-      if executed_spec_file.match?(spec_file_regex)
-        executed_spec_file.sub(spec_file_regex, app_file_substitution)
-      end
-    end.first&.sub(/_spec\.rb\z/, '.rb')
   end
 
   memo_wise \
