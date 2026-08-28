@@ -31,7 +31,7 @@ class SimpleCov::Formatter::Terminal::LinePrinter
     end
   end
 
-  # rubocop:disable Style/StringConcatenation
+  # rubocop:disable-next Style/StringConcatenation
   def numbered_line_output(line_number, color, source_code = '', missed_branch_info = nil)
     colored_space =
       case color
@@ -64,7 +64,6 @@ class SimpleCov::Formatter::Terminal::LinePrinter
 
     output
   end
-  # rubocop:enable Style/StringConcatenation
 
   memo_wise \
   def syntax_highlighted_source_lines
