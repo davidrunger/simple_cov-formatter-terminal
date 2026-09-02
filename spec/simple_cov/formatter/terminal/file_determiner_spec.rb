@@ -17,9 +17,13 @@ RSpec.describe(SimpleCov::Formatter::Terminal::FileDeterminer) do
 
     context 'when a SIMPLECOV_TARGET_FILE environment variable is present' do
       before do
-        expect(file_determiner).
-          to receive(:puts).
-          with(/Determined.*from SIMPLECOV_TARGET_FILE/)
+        allow(file_determiner).to receive(:puts)
+      end
+
+      after do
+        expect(file_determiner).to have_received(:puts).
+          with(/Determined.*from SIMPLECOV_TARGET_FILE/).
+          once
       end
 
       around do |example|
@@ -32,25 +36,38 @@ RSpec.describe(SimpleCov::Formatter::Terminal::FileDeterminer) do
 
       it 'returns the specified file' do
         expect(targeted_application_file).to eq(specified_target_file)
+        expect(file_determiner).to have_received(:puts).
+          with(/Determined.*from SIMPLECOV_TARGET_FILE/)
       end
     end
 
     context 'when a SIMPLECOV_TARGET_FILE env var is not present' do
       before do
-        expect(SimpleCov::Formatter::Terminal::RSpecIntegration).
+        allow(SimpleCov::Formatter::Terminal::RSpecIntegration).
           to receive(:executed_spec_files).
-          at_least(:once).
           and_return([executed_spec_file])
+      end
+
+      after do
+        expect(SimpleCov::Formatter::Terminal::RSpecIntegration).
+          to have_received(:executed_spec_files).
+          at_least(:once)
       end
 
       context 'when run in a non-gem project' do
         before do
-          expect(SimpleCov::Formatter::Terminal::RailsAwareness).
+          allow(SimpleCov::Formatter::Terminal::RailsAwareness).
             to receive(:rails?).
             and_return(true)
           allow(file_determiner).
             to receive(:spec_to_app_file_map).
             and_return(SimpleCov::Formatter::Terminal::SpecToAppMapping.default_spec_to_app_map)
+        end
+
+        after do
+          expect(SimpleCov::Formatter::Terminal::RailsAwareness).
+            to have_received(:rails?).
+            once
         end
 
         context 'when the executed spec file is an admin controller test' do
