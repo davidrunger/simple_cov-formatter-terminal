@@ -1,5 +1,5 @@
 ## Unreleased
-[no unreleased changes yet]
+- Print raw covered and total line counts alongside the line coverage percentage.
 
 ## v1.9.0 (2025-04-03)
 - Support specifying a range (or ranges) of lines for which to show coverage via a `SIMPLECOV_TERMINAL_LINES` environment variable.

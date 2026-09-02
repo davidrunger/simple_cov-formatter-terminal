@@ -33,15 +33,8 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
 
   def print_coverage_summary(sourcefile, log_addendum = nil)
     summary = "-- Coverage for #{targeted_application_file} --\n"
-    summary << "Line coverage: #{colorized_coverage(sourcefile.covered_percent)}"
-    if SimpleCov.branch_coverage?
-      summary << ' '
-      summary << <<~LOG
-        | Uncovered branches: #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)}
-      LOG
-    else
-      summary << "\n"
-    end
+    summary << coverage_summary(sourcefile)
+    summary << "\n"
     if log_addendum
       summary << log_addendum
     end
@@ -71,13 +64,7 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
       print_skipped_lines(skipped_lines)
     end
 
-    puts(<<~LOG.squish)
-      ----
-      Line coverage: #{colorized_coverage(sourcefile.covered_percent)}
-      |
-      Uncovered branches: #{colorized_uncovered_branches(uncovered_branches(sourcefile).size)}
-      ----
-    LOG
+    puts("---- #{coverage_summary(sourcefile)} ----")
   end
 
   def print_skipped_lines(skipped_lines)
@@ -145,10 +132,31 @@ class SimpleCov::Formatter::Terminal::ResultPrinter
   end
 
   def colorized_coverage(covered_percent)
+    color("#{covered_percent.round(2)}%", coverage_color(covered_percent))
+  end
+
+  def colorized_line_coverage(sourcefile)
+    covered_percent = sourcefile.covered_percent
+    line_count_fraction = "#{sourcefile.covered_lines.size}/#{sourcefile.lines_of_code}"
+
+    "#{colorized_coverage(covered_percent)} " \
+      "(#{color(line_count_fraction, coverage_color(covered_percent))})"
+  end
+
+  def coverage_summary(sourcefile)
+    summary = "Line coverage: #{colorized_line_coverage(sourcefile)}"
+    if SimpleCov.branch_coverage?
+      uncovered_branch_count = uncovered_branches(sourcefile).size
+      summary << " | Uncovered branches: #{colorized_uncovered_branches(uncovered_branch_count)}"
+    end
+    summary
+  end
+
+  def coverage_color(covered_percent)
     case
-    when covered_percent >= 100 then color("#{covered_percent.round(2)}%", :green)
-    when covered_percent >= 80 then color("#{covered_percent.round(2)}%", :yellow)
-    else color("#{covered_percent.round(2)}%", :red)
+    when covered_percent >= 100 then :green
+    when covered_percent >= 80 then :yellow
+    else :red
     end
   end
 
