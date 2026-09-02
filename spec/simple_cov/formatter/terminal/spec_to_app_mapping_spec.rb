@@ -8,9 +8,15 @@ RSpec.describe(SimpleCov::Formatter::Terminal::SpecToAppMapping) do
 
     context 'when not within a Rails app' do
       before do
-        expect(SimpleCov::Formatter::Terminal::RailsAwareness).
+        allow(SimpleCov::Formatter::Terminal::RailsAwareness).
           to receive(:rails?).
           and_return(false)
+      end
+
+      after do
+        expect(SimpleCov::Formatter::Terminal::RailsAwareness).
+          to have_received(:rails?).
+          once
       end
 
       it 'returns the SPEC_TO_GEM_DEFAULT_MAP' do
@@ -21,9 +27,15 @@ RSpec.describe(SimpleCov::Formatter::Terminal::SpecToAppMapping) do
 
     context 'when within a Rails app' do
       before do
-        expect(SimpleCov::Formatter::Terminal::RailsAwareness).
+        allow(SimpleCov::Formatter::Terminal::RailsAwareness).
           to receive(:rails?).
           and_return(true)
+      end
+
+      after do
+        expect(SimpleCov::Formatter::Terminal::RailsAwareness).
+          to have_received(:rails?).
+          once
       end
 
       it 'returns the SPEC_TO_RAILS_DEFAULT_MAP' do

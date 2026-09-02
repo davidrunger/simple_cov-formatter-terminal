@@ -34,10 +34,14 @@ RSpec.describe(SimpleCov::Formatter::Terminal::LinePrinter) do
     let(:terminal_hyperlink_pattern) { nil }
 
     before do
-      expect(File).
+      allow(File).
         to receive(:read).
         with('app/file.rb').
         and_return("# frozen_string_literal\n")
+    end
+
+    after do
+      expect(File).to have_received(:read).with('app/file.rb')
     end
 
     around do |spec|

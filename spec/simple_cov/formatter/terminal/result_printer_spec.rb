@@ -55,15 +55,19 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     subject(:print_coverage_details) { result_printer.print_coverage_details(sourcefile) }
 
     before do
-      expect(result_printer).
+      allow(result_printer).
         to receive(:targeted_application_file).
-        at_least(:once).
         and_return(targeted_application_file)
 
-      expect(File).
+      allow(File).
         to receive(:read).
         with(targeted_application_file).
         and_return("# frozen_string_literal\n")
+    end
+
+    after do
+      expect(result_printer).to have_received(:targeted_application_file).at_least(:once)
+      expect(File).to have_received(:read).with(targeted_application_file).once
     end
 
     context 'when a SIMPLECOV_TERMINAL_LINES env var is not present' do
@@ -118,10 +122,12 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
 
       it 'prints the skipped line dividers around the displayed line' do
         allow(result_printer).to receive(:puts)
-        expect(result_printer).to receive(:print_skipped_lines).with([1]).and_call_original
-        expect(result_printer).to receive(:print_skipped_lines).with([3]).and_call_original
+        allow(result_printer).to receive(:print_skipped_lines).and_call_original
 
         print_coverage_details
+
+        expect(result_printer).to have_received(:print_skipped_lines).with([1])
+        expect(result_printer).to have_received(:print_skipped_lines).with([3])
       end
     end
   end
@@ -134,15 +140,16 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
         to receive(:targeted_application_file).
         and_return(targeted_application_file)
       allow(SimpleCov).to receive(:branch_coverage?).and_return(false)
+      allow(result_printer).to receive(:puts)
     end
 
     it 'prints the percentage and raw line counts' do
-      expect(result_printer).to receive(:puts).with(
+      print_coverage_summary
+
+      expect(result_printer).to have_received(:puts).with(
         "-- Coverage for #{targeted_application_file} --\n" \
         "Line coverage: \e[0;33m80.5%\e[0m (\e[0;33m1/1\e[0m)\n",
       )
-
-      print_coverage_summary
     end
   end
 
@@ -152,13 +159,19 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
 
     before do
-      expect(file_determiner).to receive(:targeted_application_file).and_return('nifty_file.rb')
+      allow(file_determiner).to receive(:targeted_application_file).and_return('nifty_file.rb')
+    end
+
+    after do
+      expect(file_determiner).to have_received(:targeted_application_file).once
     end
 
     it 'prints the expected messages' do
-      expect(result_printer).to receive(:puts).with(/Looked for .* but it does not exist/)
+      allow(result_printer).to receive(:puts)
 
       print_info_for_nonexistent_application_target
+
+      expect(result_printer).to have_received(:puts).with(/Looked for .* but it does not exist/)
     end
   end
 
@@ -168,14 +181,20 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
 
     before do
-      expect(file_determiner).to receive(:executed_spec_file).and_return('nifty_spec.rb')
+      allow(file_determiner).to receive(:executed_spec_file).and_return('nifty_spec.rb')
+    end
+
+    after do
+      expect(file_determiner).to have_received(:executed_spec_file).once
     end
 
     it 'prints the expected messages' do
-      expect(result_printer).to receive(:puts).with(/Not showing test coverage details/)
-      expect(result_printer).to receive(:puts).with(/Tip: you can specify a file manually/)
+      allow(result_printer).to receive(:puts)
 
       print_info_for_undeterminable_application_target
+
+      expect(result_printer).to have_received(:puts).with(/Not showing test coverage details/)
+      expect(result_printer).to have_received(:puts).with(/Tip: you can specify a file manually/)
     end
   end
 
@@ -185,16 +204,22 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     end
 
     before do
-      expect(file_determiner).to receive(:executed_spec_file).and_return('nifty_spec.rb')
+      allow(file_determiner).to receive(:executed_spec_file).and_return('nifty_spec.rb')
+    end
+
+    after do
+      expect(file_determiner).to have_received(:executed_spec_file).once
     end
 
     it 'prints the expected messages' do
-      expect(result_printer).to receive(:puts).
-        with(/\ANot showing test coverage details because we could not map/)
-      expect(result_printer).to receive(:puts).
-        with(/\ATip: You can provide a mapping/)
+      allow(result_printer).to receive(:puts)
 
       print_info_for_undetermined_application_target
+
+      expect(result_printer).to have_received(:puts).
+        with(/\ANot showing test coverage details because we could not map/)
+      expect(result_printer).to have_received(:puts).
+        with(/\ATip: You can provide a mapping/)
     end
   end
 
