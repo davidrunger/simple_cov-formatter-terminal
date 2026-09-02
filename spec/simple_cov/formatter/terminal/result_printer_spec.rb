@@ -10,7 +10,9 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
     instance_double(
       SimpleCov::SourceFile,
       covered_percent: 80.5,
+      covered_lines: [lines.first],
       filename: targeted_application_file,
+      lines_of_code: 1,
       lines:,
       branches: [
         instance_double(
@@ -71,9 +73,27 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
         end
       end
 
-      it 'prints stuff' do
-        expect(result_printer).to receive(:puts).at_least(:once)
+      it 'prints the percentage and raw line counts' do
+        allow(result_printer).to receive(:puts)
         print_coverage_details
+
+        expect(result_printer).to have_received(:puts).with(
+          /---- Line coverage: \e\[0;33m80\.5%\e\[0m \(\e\[0;33m1\/1\e\[0m\) \|/,
+        )
+      end
+
+      context 'when branch coverage is not enabled' do
+        before { allow(SimpleCov).to receive(:branch_coverage?).and_return(false) }
+
+        it 'does not print branch coverage info' do
+          allow(result_printer).to receive(:puts)
+          print_coverage_details
+
+          expect(result_printer).to have_received(:puts).with(
+            /---- Line coverage: \e\[0;33m80\.5%\e\[0m \(\e\[0;33m1\/1\e\[0m\) ----/,
+          )
+          expect(result_printer).not_to have_received(:puts).with(/branches/)
+        end
       end
     end
 
@@ -103,6 +123,26 @@ RSpec.describe(SimpleCov::Formatter::Terminal::ResultPrinter) do
 
         print_coverage_details
       end
+    end
+  end
+
+  describe '#print_coverage_summary' do
+    subject(:print_coverage_summary) { result_printer.print_coverage_summary(sourcefile) }
+
+    before do
+      allow(result_printer).
+        to receive(:targeted_application_file).
+        and_return(targeted_application_file)
+      allow(SimpleCov).to receive(:branch_coverage?).and_return(false)
+    end
+
+    it 'prints the percentage and raw line counts' do
+      expect(result_printer).to receive(:puts).with(
+        "-- Coverage for #{targeted_application_file} --\n" \
+        "Line coverage: \e[0;33m80.5%\e[0m (\e[0;33m1/1\e[0m)\n",
+      )
+
+      print_coverage_summary
     end
   end
 
